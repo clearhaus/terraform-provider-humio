@@ -15,6 +15,10 @@
 package main
 
 import (
+	"context"
+	"flag"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 
 	"github.com/humio/terraform-provider-humio/humio"
@@ -25,7 +29,21 @@ var (
 )
 
 func main() {
-	plugin.Serve(&plugin.ServeOpts{
+	var debugMode bool
+	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	flag.Parse()
+
+	opts := &plugin.ServeOpts{
 		ProviderFunc: humio.Provider,
-	})
+	}
+
+	if debugMode {
+		err := plugin.Debug(context.Background(), "clearhaus/humio", opts)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		return
+	}
+
+	plugin.Serve(opts)
 }
