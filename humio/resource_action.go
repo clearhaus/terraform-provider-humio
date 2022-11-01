@@ -482,9 +482,16 @@ func actionFromResourceData(d *schema.ResourceData) (humio.Action, error) {
 		}
 	case humio.ActionTypeWebhook:
 		properties := getActionPropertiesFromResourceData(d, "webhook", "url")
+		headers := []humio.HttpHeaderEntryInput{}
+		for header, value := range properties[0]["headers"].(map[string]interface{}) {
+			headers = append(headers, humio.HttpHeaderEntryInput{
+				Header: header,
+				Value:  value.(string),
+			})
+		}
 		action.WebhookAction = humio.WebhookAction{
 			BodyTemplate: properties[0]["body_template"].(string),
-			Headers:      properties[0]["headers"].([]humio.HttpHeaderEntryInput),
+			Headers:      headers,
 			Method:       properties[0]["method"].(string),
 			Url:          properties[0]["url"].(string),
 		}
@@ -575,8 +582,12 @@ func victoropsFromAction(a *humio.Action) []tfMap {
 
 func webhookFromAction(a *humio.Action) []tfMap {
 	s := tfMap{}
+	headers := make(map[string]string)
+	for _, pair := range a.WebhookAction.Headers {
+		headers[pair.Header] = pair.Value
+	}
 	s["body_template"] = a.WebhookAction.BodyTemplate
-	s["headers"] = a.WebhookAction.Headers
+	s["headers"] = headers
 	s["method"] = a.WebhookAction.Method
 	s["url"] = a.WebhookAction.Url
 	return []tfMap{s}
