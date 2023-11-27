@@ -51,7 +51,6 @@ require (
 	github.com/hashicorp/terraform-exec v0.12.0 // indirect
 	github.com/hashicorp/terraform-json v0.8.0 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.1.0 // indirect
-	github.com/hashicorp/terraform-plugin-log v0.9.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
