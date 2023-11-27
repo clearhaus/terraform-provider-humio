@@ -38,24 +38,14 @@ func resourceRepository() *schema.Resource {
 			},
 			"retention": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"storage_size_in_gb": {
-							Type:             schema.TypeFloat,
-							Optional:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0)),
-						},
-						"ingest_size_in_gb": {
-							Type:             schema.TypeFloat,
-							Optional:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0)),
-						},
 						"time_in_days": {
 							Type:             schema.TypeFloat,
 							Optional:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(1, 365)),
 						},
 					},
 				},
@@ -84,6 +74,7 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, clien
 	if err != nil {
 		return diag.Errorf("could not set description for repository: %s", err)
 	}
+
 	err = client.(*humio.Client).Repositories().UpdateTimeBasedRetention(
 		repository.Name,
 		repository.RetentionDays,
@@ -91,22 +82,6 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, clien
 	)
 	if err != nil {
 		return diag.Errorf("could not set time based retention for repository: %s", err)
-	}
-	err = client.(*humio.Client).Repositories().UpdateIngestBasedRetention(
-		repository.Name,
-		repository.IngestRetentionSizeGB,
-		d.Get("allow_data_deletion").(bool),
-	)
-	if err != nil {
-		return diag.Errorf("could not set ingest size retention for repository: %s", err)
-	}
-	err = client.(*humio.Client).Repositories().UpdateStorageBasedRetention(
-		repository.Name,
-		repository.StorageRetentionSizeGB,
-		d.Get("allow_data_deletion").(bool),
-	)
-	if err != nil {
-		return diag.Errorf("could not set storage size retention for repository: %s", err)
 	}
 
 	d.SetId(repository.Name)
@@ -117,7 +92,7 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, clien
 func resourceRepositoryRead(_ context.Context, d *schema.ResourceData, client interface{}) diag.Diagnostics {
 	repo, err := client.(*humio.Client).Repositories().Get(d.Id())
 	if err != nil {
-		return diag.Errorf("could not get repository: %s", err)
+		diag.Errorf("could not get repository: %s", err)
 	}
 	return resourceDataFromRepository(&repo, d)
 }
@@ -140,8 +115,6 @@ func resourceDataFromRepository(a *humio.Repository, d *schema.ResourceData) dia
 func retentionFromRepository(a *humio.Repository) []tfMap {
 	s := tfMap{}
 	s["time_in_days"] = a.RetentionDays
-	s["ingest_size_in_gb"] = a.IngestRetentionSizeGB
-	s["storage_size_in_gb"] = a.StorageRetentionSizeGB
 	return []tfMap{s}
 }
 
@@ -161,22 +134,6 @@ func resourceRepositoryUpdate(ctx context.Context, d *schema.ResourceData, clien
 	err = client.(*humio.Client).Repositories().UpdateTimeBasedRetention(
 		repository.Name,
 		repository.RetentionDays,
-		d.Get("allow_data_deletion").(bool),
-	)
-	if err != nil {
-		return diag.Errorf("could not update time based retention for repository: %s", err)
-	}
-	err = client.(*humio.Client).Repositories().UpdateIngestBasedRetention(
-		repository.Name,
-		repository.IngestRetentionSizeGB,
-		d.Get("allow_data_deletion").(bool),
-	)
-	if err != nil {
-		return diag.Errorf("could not update time based retention for repository: %s", err)
-	}
-	err = client.(*humio.Client).Repositories().UpdateStorageBasedRetention(
-		repository.Name,
-		repository.StorageRetentionSizeGB,
 		d.Get("allow_data_deletion").(bool),
 	)
 	if err != nil {
@@ -205,13 +162,14 @@ func resourceRepositoryDelete(_ context.Context, d *schema.ResourceData, client 
 }
 
 func repositoryFromResourceData(d *schema.ResourceData) (humio.Repository, error) {
-	retention := d.Get("retention").(*schema.Set).List()[0].(tfMap)
+	var retentionDays float64
+	if rawRetention, ok := d.GetOk("retention"); ok {
+		retentionDays = rawRetention.(*schema.Set).List()[0].(tfMap)["time_in_days"].(float64)
+	}
 
 	return humio.Repository{
 		Name:                   d.Get("name").(string),
 		Description:            d.Get("description").(string),
-		RetentionDays:          retention["time_in_days"].(float64),
-		IngestRetentionSizeGB:  retention["ingest_size_in_gb"].(float64),
-		StorageRetentionSizeGB: retention["storage_size_in_gb"].(float64),
+		RetentionDays:          retentionDays,
 	}, nil
 }

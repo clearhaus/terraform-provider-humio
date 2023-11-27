@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/docker/go-connections v0.4.0
-	github.com/google/go-cmp v0.5.2
+	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.0
 	github.com/humio/cli v0.32.3
@@ -29,7 +29,7 @@ require (
 	github.com/docker/distribution v2.7.1-0.20190205005809-0d3efadf0154+incompatible // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible // indirect
 	github.com/docker/go-units v0.3.3 // indirect
-	github.com/fatih/color v1.10.0 // indirect
+	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-git/go-git/v5 v5.2.0 // indirect
 	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
@@ -40,7 +40,7 @@ require (
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
 	github.com/hashicorp/go-getter v1.5.0 // indirect
-	github.com/hashicorp/go-hclog v0.15.0 // indirect
+	github.com/hashicorp/go-hclog v1.5.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/go-plugin v1.4.0 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
@@ -51,13 +51,14 @@ require (
 	github.com/hashicorp/terraform-exec v0.12.0 // indirect
 	github.com/hashicorp/terraform-json v0.8.0 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.1.0 // indirect
+	github.com/hashicorp/terraform-plugin-log v0.9.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
-	github.com/mattn/go-colorable v0.1.8 // indirect
-	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
