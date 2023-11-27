@@ -1,7 +1,7 @@
 resource "humio_action" "example_webhook" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "example_webhook"
-  type       = "WebHookAction"
+  type       = "WebhookAction"
 
   webhook {
     method = "POST"

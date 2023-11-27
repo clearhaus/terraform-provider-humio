@@ -9,7 +9,7 @@ resource "humio_action" "example_email" {
 }
 
 resource "humio_action" "example_email_body" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "example_email_body"
   type       = "EmailAction"
 
@@ -20,7 +20,7 @@ resource "humio_action" "example_email_body" {
 }
 
 resource "humio_action" "example_email_subject" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "example_email_subject"
   type       = "EmailAction"
 
@@ -31,7 +31,7 @@ resource "humio_action" "example_email_subject" {
 }
 
 resource "humio_action" "example_email_body_subject" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "example_email_body_subject"
   type       = "EmailAction"
 

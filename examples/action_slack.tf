@@ -1,5 +1,5 @@
 resource "humio_action" "example_slack" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "example_slack"
   type       = "SlackAction"
 

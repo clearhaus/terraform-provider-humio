@@ -1,5 +1,5 @@
 resource "humio_action" "example_victorops" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "example_victorops"
   type       = "VictorOpsAction"
 

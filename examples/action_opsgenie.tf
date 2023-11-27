@@ -1,5 +1,5 @@
 resource "humio_action" "example_opsgenie" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "example_opsgenie"
   type       = "OpsGenieAction"
 

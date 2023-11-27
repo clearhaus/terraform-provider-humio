@@ -1,5 +1,5 @@
 resource "humio_action" "example_pagerduty" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "example_pagerduty"
   type       = "PagerDutyAction"
 

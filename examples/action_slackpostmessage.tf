@@ -1,10 +1,10 @@
 resource "humio_action" "example_slackpostmessage" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "example_slackpostmessage"
   type       = "SlackPostMessageAction"
 
   slackpostmessage {
-    api_key  = "abcdefghij1234567890"
+    api_token  = "abcdefghij1234567890"
     channels = ["#alerts", "#ops"]
     fields = {
       "Events String" = "{events_str}"
