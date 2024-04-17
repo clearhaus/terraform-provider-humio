@@ -11,10 +11,11 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Install Go
-        uses: actions/setup-go@v2
+      - name: Set up Go
+        uses: actions/setup-go@v3
         with:
-          go-version: 2.21
+          go-version-file: 'go.mod'
+          cache: true
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Compile
