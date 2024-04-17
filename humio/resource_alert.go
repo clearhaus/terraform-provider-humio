@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -86,6 +87,23 @@ func resourceAlert() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"run_as_user_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"query_ownership_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				ValidateDiagFunc:	func(v interface{}, path cty.Path) diag.Diagnostics {
+					value := v.(string)
+					if value == "Organization" || value == "User" {
+						return nil
+					}
+					return diag.Errorf("query_ownership_type must be 'User' or 'Organization' (case sensitive)")
+				},
 			},
 		},
 	}
@@ -178,6 +196,14 @@ func resourceDataFromAlert(a *humio.Alert, d *schema.ResourceData) diag.Diagnost
 	if err != nil {
 		return diag.Errorf("error setting start for resource %s: %s", d.Id(), err)
 	}
+	err = d.Set("run_as_user_id", a.RunAsUserID)
+	if err != nil {
+		return diag.Errorf("error setting run_as_user_id for resource %s: %s", d.Id(), err)
+	}
+	err = d.Set("query_ownership_type", a.QueryOwnershipType)
+	if err != nil {
+		return diag.Errorf("error setting query_ownership_type for resource %s: %s", d.Id(), err)
+	}
 	return nil
 }
 
@@ -226,6 +252,8 @@ func alertFromResourceData(d *schema.ResourceData) (humio.Alert, error) {
 		Labels:             convertInterfaceListToStringSlice(d.Get("labels").([]interface{})),
 		QueryString:        d.Get("query").(string),
 		QueryStart:         d.Get("start").(string),
+		RunAsUserID:        d.Get("run_as_user_id").(string),
+		QueryOwnershipType: d.Get("query_ownership_type").(string),
 	}, nil
 }
 

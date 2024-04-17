@@ -27,7 +27,7 @@ resource "humio_parser" "gc" {
   test_data     = ["[2018-12-05T08:21:06.750+0000][gc             ] GC(5016) Pause Young (Allocation Failure) 2435M->1587M(2553M) 5.766ms"]
   parser_script = <<PARSERSCRIPT
 /\[(?<@timestamp>[^\]]+)\]/ |
-parseTimestamp(format="yyyy-MM-dd'T'HH:mm:ss.SSSX", field=@timestamp) | 
+parseTimestamp(format="yyyy-MM-dd'T'HH:mm:ss.SSSX", field=@timestamp) |
 kvParse() |
 regex("(?<@gctime>[0-9.]+)ms", strict=false)
 PARSERSCRIPT
@@ -42,7 +42,7 @@ resource "humio_parser" "gc_kafka" {
   ]
   parser_script = <<PARSERSCRIPT
 /\[(?<@timestamp>[^\]]+)\]/ |
-parseTimestamp(format="yyyy-MM-dd'T'HH:mm:ss.SSSX", field=@timestamp) | 
+parseTimestamp(format="yyyy-MM-dd'T'HH:mm:ss.SSSX", field=@timestamp) |
 kvParse() |
 regex("(?<@gctime>[0-9.]+)ms", strict=false)
 PARSERSCRIPT
@@ -54,7 +54,7 @@ resource "humio_parser" "gc_zk" {
   test_data     = ["[2018-12-05T08:11:25.249+0000][gc,cpu       ] GC(6) User=0.03s Sys=0.00s Real=0.00s"]
   parser_script = <<PARSERSCRIPT
 /\[(?<@timestamp>[^\]]+)\]/ |
-parseTimestamp(format="yyyy-MM-dd'T'HH:mm:ss.SSSX", field=@timestamp) | 
+parseTimestamp(format="yyyy-MM-dd'T'HH:mm:ss.SSSX", field=@timestamp) |
 kvParse() |
 regex("(?<@gctime>[0-9.]+)ms", strict=false)
 PARSERSCRIPT
@@ -106,7 +106,7 @@ resource "humio_parser" "kafka_gc" {
   ]
   parser_script = <<PARSERSCRIPT
 /\[(?<@timestamp>[^\]]+)\]/ |
-parseTimestamp(format="yyyy-MM-dd'T'HH:mm:ss.SSSX", field=@timestamp) | 
+parseTimestamp(format="yyyy-MM-dd'T'HH:mm:ss.SSSX", field=@timestamp) |
 kvParse() |
 regex("(?<@gctime>[0-9.]+)ms", strict=false)
 PARSERSCRIPT

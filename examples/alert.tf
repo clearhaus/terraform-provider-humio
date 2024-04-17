@@ -8,20 +8,20 @@ resource "humio_alert" "example_alert_with_labels" {
   throttle_time_millis = 300000
   enabled              = true
   query                = "count()"
-  start                = "24h"
+  start                = "12h"
 }
 
 resource "humio_alert" "example_alert_with_throttle_field" {
-  repository  = humio_action.example_email.repository
-  name        = "example_alert_with_throttle_field"
+  repository = humio_action.example_email.repository
+  name       = "example_alert_with_throttle_field"
 
-  actions   = [humio_action.example_email.action_id]
+  actions = [humio_action.example_email.action_id]
 
   throttle_time_millis = 300000
   throttle_field       = "serviceName"
   enabled              = true
   query                = "level = ERROR"
-  start                = "24h"
+  start                = "12h"
 }
 
 resource "humio_alert" "example_alert_without_labels" {
@@ -33,7 +33,7 @@ resource "humio_alert" "example_alert_without_labels" {
   throttle_time_millis = 300000
   enabled              = true
   query                = "count()"
-  start                = "24h"
+  start                = "12h"
 }
 
 resource "humio_alert" "example_alert_with_description" {
@@ -46,10 +46,34 @@ resource "humio_alert" "example_alert_with_description" {
     humio_action.example_email_subject.action_id,
   ]
 
-  link_url             = "http://localhost:8080/humio/search?query=count()&live=true&start=24h&fullscreen=false"
   labels               = ["terraform", "ops"]
   throttle_time_millis = 300000
   enabled              = true
   query                = "count()"
-  start                = "24h"
+  start                = "1d"
+}
+
+resource "humio_alert" "example_alert_with_user_owner" {
+  repository = humio_action.example_email_body.repository
+  name       = "example_alert_with_user_owner"
+
+  throttle_time_millis = 300000
+  enabled              = true
+  query                = "count()"
+  start                = "1d"
+
+  query_ownership_type = "User"
+}
+
+
+resource "humio_alert" "example_alert_with_organization_owner" {
+  repository = humio_action.example_email_body.repository
+  name       = "example_alert_with_organization_owner"
+
+  throttle_time_millis = 300000
+  enabled              = true
+  query                = "count()"
+  start                = "1d"
+
+  query_ownership_type = "Organization"
 }
