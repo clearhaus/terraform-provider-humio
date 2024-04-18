@@ -97,7 +97,7 @@ func resourceAlert() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				ValidateDiagFunc:	func(v interface{}, path cty.Path) diag.Diagnostics {
+				ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
 					value := v.(string)
 					if value == "Organization" || value == "User" {
 						return nil
