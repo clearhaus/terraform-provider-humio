@@ -62,6 +62,7 @@ resource "humio_alert" "example_alert_with_user_owner" {
   query                = "count()"
   start                = "1d"
 
+  # run_as_user_id       = "XXXXXXXXXXXXXXXXXXXXXXXX"
   query_ownership_type = "User"
 }
 
