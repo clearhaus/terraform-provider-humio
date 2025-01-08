@@ -469,8 +469,8 @@ func actionFromResourceData(d *schema.ResourceData) (humio.Action, error) {
 			})
 		}
 		channels := []string{}
-		for _, channel := range properties[0]["fields"].(map[string]interface{}) {
-			channels = append(channels, channel.(string));
+		for _, channel := range properties[0]["channels"].([]interface{}) {
+			channels = append(channels, channel.(string))
 		}
 		action.SlackPostMessageAction = humio.SlackPostMessageAction{
 			ApiToken: properties[0]["api_token"].(string),
