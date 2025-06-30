@@ -135,10 +135,9 @@ func testAccCheckParserDestroy(s *terraform.State) error {
 		parts := parseRepositoryAndID(rs.Primary.ID)
 		resp, err := conn.Parsers().Get(parts[0], parts[1])
 		emptyParser := humio.Parser{
-			Name:      "",
-			Example:   "",
-			Script:    "",
-			TagFields: nil,
+			Name:        "",
+			Script:      "",
+			FieldsToTag: nil,
 		}
 		if err == nil {
 			if !reflect.DeepEqual(*resp, emptyParser) {
@@ -181,11 +180,10 @@ resource "humio_parser" "test" {
 `
 
 var wantParser = humio.Parser{
-	Name:      "test-parser",
-	Tests:     nil,
-	Example:   "",
-	Script:    "",
-	TagFields: nil,
+	Name:        "test-parser",
+	TestCases:   nil,
+	Script:      "",
+	FieldsToTag: nil,
 }
 
 func TestEncodeDecodeParserResource(t *testing.T) {

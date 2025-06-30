@@ -1,5 +1,5 @@
 resource "humio_parser" "emojis_loglevels" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "emojis"
   parser_script = <<PARSERSCRIPT
 case {
@@ -14,7 +14,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "filebeat" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "filebeat-log"
   parser_script = <<PARSERSCRIPT
 regex("(?<@timestamp>\\S+)\\s+(?<loglevel>\\S+)\\s+\\[?(?<source>[^\\ \\]]+)") | parseTimestamp(field=@timestamp, format="yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX")
@@ -22,7 +22,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "gc" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "gc"
   test_data     = ["[2018-12-05T08:21:06.750+0000][gc             ] GC(5016) Pause Young (Allocation Failure) 2435M->1587M(2553M) 5.766ms"]
   parser_script = <<PARSERSCRIPT
@@ -49,7 +49,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "gc_zk" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "gc-zk"
   test_data     = ["[2018-12-05T08:11:25.249+0000][gc,cpu       ] GC(6) User=0.03s Sys=0.00s Real=0.00s"]
   parser_script = <<PARSERSCRIPT
@@ -61,7 +61,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "http_error" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "http-error"
   parser_script = <<PARSERSCRIPT
 regex("(?<@timestamp>[\\d\\/\\:]+\\s+[\\d\\/\\:]+)\\s+(\\[(?<severity>[^\\]]+)\\])?") | parseTimestamp(field=@timestamp, format="yyyy/MM/dd' 'HH:mm:ss", timezone="UTC")
@@ -69,7 +69,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "humio_stdout" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "humio-stdout"
   parser_script = <<PARSERSCRIPT
 regex("") | parseTimestamp(field=@timestamp, format="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -91,7 +91,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "kafka" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "kafka"
   parser_script = <<PARSERSCRIPT
 regex("\\[(?<@timestamp>[^\\]]+)\\]\\s+(?<loglevel>\\S+)\\s+(\\[(?<thread>[^]]+)\\]\\:)?") | parseTimestamp(field=@timestamp, format="yyyy-MM-dd' 'HH:mm:ss,SSS", timezone="UTC") | kvParse()
@@ -112,7 +112,7 @@ regex("(?<@gctime>[0-9.]+)ms", strict=false)
 PARSERSCRIPT
 }
 resource "humio_parser" "metricbeat" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "metricbeat-log"
   parser_script = <<PARSERSCRIPT
 regex("(?<@timestamp>\\S+)\\s+(?<loglevel>\\S+)\\s+\\[?(?<source>[^\\ \\]]+)") | parseTimestamp(field=@timestamp, format="yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX")
@@ -120,7 +120,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "unattended_upgrades" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "unattended-upgrades"
   parser_script = <<PARSERSCRIPT
 /^(?<ts>\S+?\s\S+?)\s(?<loglevel>\w+?)/
@@ -177,7 +177,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "zookeeper" {
-  repository    = "humio"
+  repository    = "sandbox"
   name          = "zookeeper"
   parser_script = <<PARSERSCRIPT
 regex("\\[(?<@timestamp>[^\\]]+)\\]\\s+(?<loglevel>\\S+)\\s+(\\[(?<thread>[^]]+)\\]\\:)?") | parseTimestamp(field=@timestamp, format="yyyy-MM-dd' 'HH:mm:ss,SSS", timezone="UTC") | kvParse()

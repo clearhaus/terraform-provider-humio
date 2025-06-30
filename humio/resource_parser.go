@@ -69,7 +69,7 @@ func resourceParserCreate(ctx context.Context, d *schema.ResourceData, client in
 		return diag.Errorf("could not obtain parser from resource data: %s", err)
 	}
 
-	err = client.(*humio.Client).Parsers().Add(
+	_, err = client.(*humio.Client).Parsers().Add(
 		d.Get("repository").(string),
 		&parser,
 		false,
@@ -104,7 +104,7 @@ func resourceParserRead(_ context.Context, d *schema.ResourceData, client interf
 		d.Get("repository").(string),
 		d.Get("name").(string),
 	)
-	if err != nil || reflect.DeepEqual(*parser, humio.Parser{Tests: []string{}}) {
+	if err != nil || reflect.DeepEqual(*parser, humio.Parser{TestCases: []humio.ParserTestCase{}}) {
 		return diag.Errorf("could not get parser: %s", err)
 	}
 	return resourceDataFromParser(parser, d)
@@ -119,13 +119,13 @@ func resourceDataFromParser(a *humio.Parser, d *schema.ResourceData) diag.Diagno
 	if err != nil {
 		return diag.Errorf("error setting parser_script for resource %s: %s", d.Id(), err)
 	}
-	err = d.Set("tag_fields", a.TagFields)
+	err = d.Set("tag_fields", a.FieldsToTag)
 	if err != nil {
 		return diag.Errorf("error setting tag_fields for resource %s: %s", d.Id(), err)
 	}
 	var tests []string
-	for _, test2 := range a.Tests {
-		tests = append(tests, test2)
+	for _, testCase := range a.TestCases {
+		tests = append(tests, testCase.Event.RawString)
 	}
 	err = d.Set("test_data", tests)
 	if err != nil {
@@ -140,7 +140,7 @@ func resourceParserUpdate(ctx context.Context, d *schema.ResourceData, client in
 		return diag.Errorf("could not obtain parser from resource data: %s", err)
 	}
 
-	err = client.(*humio.Client).Parsers().Add(
+	_, err = client.(*humio.Client).Parsers().Add(
 		d.Get("repository").(string),
 		&parser,
 		true,
@@ -152,11 +152,21 @@ func resourceParserUpdate(ctx context.Context, d *schema.ResourceData, client in
 }
 
 func parserFromResourceData(d *schema.ResourceData) (humio.Parser, error) {
+	testData := convertInterfaceListToStringSlice(d.Get("test_data").([]interface{}))
+	var testCases []humio.ParserTestCase
+	for _, testString := range testData {
+		testCases = append(testCases, humio.ParserTestCase{
+			Event: humio.ParserTestEvent{
+				RawString: testString,
+			},
+		})
+	}
+
 	return humio.Parser{
-		Name:      d.Get("name").(string),
-		Script:    d.Get("parser_script").(string),
-		TagFields: convertInterfaceListToStringSlice(d.Get("tag_fields").([]interface{})),
-		Tests:     convertInterfaceListToStringSlice(d.Get("test_data").([]interface{})),
+		Name:        d.Get("name").(string),
+		Script:      d.Get("parser_script").(string),
+		FieldsToTag: convertInterfaceListToStringSlice(d.Get("tag_fields").([]interface{})),
+		TestCases:   testCases,
 	}, nil
 }
 
@@ -166,7 +176,7 @@ func resourceParserDelete(_ context.Context, d *schema.ResourceData, client inte
 		return diag.Errorf("could not obtain parser from resource data: %s", err)
 	}
 
-	err = client.(*humio.Client).Parsers().Remove(
+	err = client.(*humio.Client).Parsers().Delete(
 		d.Get("repository").(string),
 		parser.Name,
 	)
