@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	humio "github.com/humio/terraform-provider-humio/internal/api"
+	humio "github.com/clearhaus/terraform-provider-humio/internal/api"
 )
 
 func resourceRepository() *schema.Resource {

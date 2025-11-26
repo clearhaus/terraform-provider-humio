@@ -1,4 +1,4 @@
-module github.com/humio/terraform-provider-humio
+module github.com/clearhaus/terraform-provider-humio
 
 go 1.23.0
 

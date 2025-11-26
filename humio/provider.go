@@ -25,7 +25,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	humio "github.com/humio/terraform-provider-humio/internal/api"
+	humio "github.com/clearhaus/terraform-provider-humio/internal/api"
 )
 
 // tfMap is a shorthand alias for convenience; Terraform uses this type a *lot*.

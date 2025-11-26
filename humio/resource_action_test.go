@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	humio "github.com/humio/terraform-provider-humio/internal/api"
+	humio "github.com/clearhaus/terraform-provider-humio/internal/api"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
