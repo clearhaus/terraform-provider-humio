@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	humio "github.com/humio/cli/api"
+	humio "github.com/humio/terraform-provider-humio/internal/api"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -215,11 +215,9 @@ resource "humio_repository" "test" {
 `
 
 var wantRepository = humio.Repository{
-	Name:                   "test-repository",
-	Description:            "important",
-	RetentionDays:          30,
-	IngestRetentionSizeGB:  10,
-	StorageRetentionSizeGB: 5,
+	Name:          "test-repository",
+	Description:   "important",
+	RetentionDays: 30,
 }
 
 func TestEncodeDecodeRepositoryResource(t *testing.T) {

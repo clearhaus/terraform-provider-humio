@@ -1,0 +1,201 @@
+// Copyright © 2024 Clearhaus
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package api
+
+import (
+	"context"
+)
+
+// Repository represents a Humio repository
+type Repository struct {
+	ID            string
+	Name          string
+	Description   string
+	RetentionDays float64
+}
+
+// Repositories provides operations for managing repositories
+type Repositories struct {
+	client *Client
+}
+
+const getRepositoryQuery = `
+query GetRepository($RepositoryName: String!) {
+  repository(name: $RepositoryName) {
+    id
+    name
+    description
+    timeBasedRetention
+  }
+}
+`
+
+const createRepositoryMutation = `
+mutation CreateRepository($Name: String!) {
+  createRepository(name: $Name) {
+    id
+    name
+  }
+}
+`
+
+const updateDescriptionMutation = `
+mutation UpdateDescription($RepositoryName: String!, $Description: String!) {
+  updateDescriptionForSearchDomain(input: {
+    name: $RepositoryName
+    description: $Description
+  }) {
+    id
+    name
+    description
+  }
+}
+`
+
+const updateTimeBasedRetentionMutation = `
+mutation UpdateTimeBasedRetention($RepositoryName: String!, $RetentionDays: Float, $AllowDataDeletion: Boolean!) {
+  updateRetentionForSearchDomain(input: {
+    repositoryName: $RepositoryName
+    timeBasedRetention: $RetentionDays
+    allowDataDeletion: $AllowDataDeletion
+  }) {
+    id
+    name
+    timeBasedRetention
+  }
+}
+`
+
+const deleteRepositoryMutation = `
+mutation DeleteRepository($RepositoryName: String!, $Reason: String!, $AllowDataDeletion: Boolean!) {
+  deleteSearchDomain(name: $RepositoryName, deleteMessage: $Reason, allowDataDeletion: $AllowDataDeletion)
+}
+`
+
+const listRepositoriesQuery = `
+query ListRepositories {
+  repositories {
+    id
+    name
+  }
+}
+`
+
+// listRepositoriesResponse represents the response from list repositories query
+type listRepositoriesResponse struct {
+	Repositories []struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	} `json:"repositories"`
+}
+
+// getRepositoryResponse represents the response from get repository query
+type getRepositoryResponse struct {
+	Repository struct {
+		ID                 string   `json:"id"`
+		Name               string   `json:"name"`
+		Description        string   `json:"description"`
+		TimeBasedRetention *float64 `json:"timeBasedRetention"`
+	} `json:"repository"`
+}
+
+// createRepositoryResponse represents the response from create repository mutation
+type createRepositoryResponse struct {
+	CreateRepository struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	} `json:"createRepository"`
+}
+
+// List returns all repositories
+func (r *Repositories) List() ([]Repository, error) {
+	var resp listRepositoriesResponse
+	err := r.client.Query(context.Background(), listRepositoriesQuery, nil, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	repositories := make([]Repository, len(resp.Repositories))
+	for i, repo := range resp.Repositories {
+		repositories[i] = Repository{
+			ID:   repo.ID,
+			Name: repo.Name,
+		}
+	}
+	return repositories, nil
+}
+
+// Get returns a repository by name
+func (r *Repositories) Get(name string) (Repository, error) {
+	var resp getRepositoryResponse
+	err := r.client.Query(context.Background(), getRepositoryQuery, map[string]interface{}{
+		"RepositoryName": name,
+	}, &resp)
+	if err != nil {
+		return Repository{}, err
+	}
+
+	retentionDays := 0.0
+	if resp.Repository.TimeBasedRetention != nil {
+		retentionDays = *resp.Repository.TimeBasedRetention
+	}
+
+	return Repository{
+		ID:            resp.Repository.ID,
+		Name:          resp.Repository.Name,
+		Description:   resp.Repository.Description,
+		RetentionDays: retentionDays,
+	}, nil
+}
+
+// Create creates a new repository
+func (r *Repositories) Create(name string) error {
+	var resp createRepositoryResponse
+	return r.client.Query(context.Background(), createRepositoryMutation, map[string]interface{}{
+		"Name": name,
+	}, &resp)
+}
+
+// UpdateDescription updates the description of a repository
+func (r *Repositories) UpdateDescription(name, description string) error {
+	return r.client.Query(context.Background(), updateDescriptionMutation, map[string]interface{}{
+		"RepositoryName": name,
+		"Description":    description,
+	}, nil)
+}
+
+// UpdateTimeBasedRetention updates the time-based retention for a repository
+func (r *Repositories) UpdateTimeBasedRetention(name string, retentionDays float64, allowDataDeletion bool) error {
+	variables := map[string]interface{}{
+		"RepositoryName":    name,
+		"AllowDataDeletion": allowDataDeletion,
+	}
+
+	// Only set retention if it's > 0, otherwise null means unlimited
+	if retentionDays > 0 {
+		variables["RetentionDays"] = retentionDays
+	}
+
+	return r.client.Query(context.Background(), updateTimeBasedRetentionMutation, variables, nil)
+}
+
+// Delete deletes a repository
+func (r *Repositories) Delete(name, reason string, allowDataDeletion bool) error {
+	return r.client.Query(context.Background(), deleteRepositoryMutation, map[string]interface{}{
+		"RepositoryName":    name,
+		"Reason":            reason,
+		"AllowDataDeletion": allowDataDeletion,
+	}, nil)
+}

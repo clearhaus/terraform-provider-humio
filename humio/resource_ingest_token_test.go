@@ -21,7 +21,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	humio "github.com/humio/cli/api"
+	humio "github.com/humio/terraform-provider-humio/internal/api"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
