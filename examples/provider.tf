@@ -2,7 +2,7 @@ terraform {
   required_providers {
     humio = {
       source  = "clearhaus/humio"
-      version = "0.5.0"
+      version = "1.0.0"
     }
   }
 }
