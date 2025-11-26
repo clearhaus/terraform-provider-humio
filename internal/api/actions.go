@@ -1,17 +1,3 @@
-// Copyright © 2024 Clearhaus
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package api
 
 import (
@@ -345,18 +331,18 @@ mutation CreateWebhookAction(
 type actionResponse struct {
 	SearchDomain struct {
 		Actions []struct {
-			Typename        string `json:"__typename"`
-			ID              string `json:"id"`
-			Name            string `json:"name"`
+			Typename        string   `json:"__typename"`
+			ID              string   `json:"id"`
+			Name            string   `json:"name"`
 			Recipients      []string `json:"recipients,omitempty"`
-			SubjectTemplate string `json:"subjectTemplate,omitempty"`
-			BodyTemplate    string `json:"bodyTemplate,omitempty"`
-			IngestToken     string `json:"ingestToken,omitempty"`
-			ApiUrl          string `json:"apiUrl,omitempty"`
-			GenieKey        string `json:"genieKey,omitempty"`
-			RoutingKey      string `json:"routingKey,omitempty"`
-			Severity        string `json:"severity,omitempty"`
-			Url             string `json:"url,omitempty"`
+			SubjectTemplate string   `json:"subjectTemplate,omitempty"`
+			BodyTemplate    string   `json:"bodyTemplate,omitempty"`
+			IngestToken     string   `json:"ingestToken,omitempty"`
+			ApiUrl          string   `json:"apiUrl,omitempty"`
+			GenieKey        string   `json:"genieKey,omitempty"`
+			RoutingKey      string   `json:"routingKey,omitempty"`
+			Severity        string   `json:"severity,omitempty"`
+			Url             string   `json:"url,omitempty"`
 			Fields          []struct {
 				FieldName string `json:"fieldName"`
 				Value     string `json:"value"`
