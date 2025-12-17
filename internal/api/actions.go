@@ -127,10 +127,12 @@ query ListActions($SearchDomainName: String!) {
       ... on OpsGenieAction {
         apiUrl
         genieKey
+        opsGenieUseProxy: useProxy
       }
       ... on PagerDutyAction {
         routingKey
         severity
+        pagerDutyUseProxy: useProxy
       }
       ... on SlackAction {
         url
@@ -138,6 +140,7 @@ query ListActions($SearchDomainName: String!) {
           fieldName
           value
         }
+        slackUseProxy: useProxy
       }
       ... on SlackPostMessageAction {
         apiToken
@@ -151,6 +154,7 @@ query ListActions($SearchDomainName: String!) {
       ... on VictorOpsAction {
         messageType
         notifyUrl
+        victorOpsUseProxy: useProxy
       }
       ... on WebhookAction {
         method
@@ -365,9 +369,12 @@ type actionResponse struct {
 			IngestToken           string   `json:"ingestToken,omitempty"`
 			ApiUrl                string   `json:"apiUrl,omitempty"`
 			GenieKey              string   `json:"genieKey,omitempty"`
+			OpsGenieUseProxy      bool     `json:"opsGenieUseProxy,omitempty"`
 			RoutingKey            string   `json:"routingKey,omitempty"`
 			Severity              string   `json:"severity,omitempty"`
+			PagerDutyUseProxy     bool     `json:"pagerDutyUseProxy,omitempty"`
 			Url                   string   `json:"url,omitempty"`
+			SlackUseProxy         bool     `json:"slackUseProxy,omitempty"`
 			Fields                []struct {
 				FieldName string `json:"fieldName"`
 				Value     string `json:"value"`
@@ -377,6 +384,7 @@ type actionResponse struct {
 			UseProxy              bool     `json:"useProxy,omitempty"`
 			MessageType           string   `json:"messageType,omitempty"`
 			NotifyUrl             string   `json:"notifyUrl,omitempty"`
+			VictorOpsUseProxy     bool     `json:"victorOpsUseProxy,omitempty"`
 			Method                string   `json:"method,omitempty"`
 			WebhookUrl            string   `json:"webhookUrl,omitempty"`
 			WebhookBodyTemplate   string   `json:"webhookBodyTemplate,omitempty"`
@@ -435,11 +443,13 @@ func (a *Actions) List(repository string) ([]Action, error) {
 			action.OpsGenieAction = OpsGenieAction{
 				ApiUrl:   rawAction.ApiUrl,
 				GenieKey: rawAction.GenieKey,
+				UseProxy: rawAction.OpsGenieUseProxy,
 			}
 		case ActionTypePagerDuty:
 			action.PagerDutyAction = PagerDutyAction{
 				RoutingKey: rawAction.RoutingKey,
 				Severity:   rawAction.Severity,
+				UseProxy:   rawAction.PagerDutyUseProxy,
 			}
 		case ActionTypeSlack:
 			fields := make([]SlackFieldEntryInput, len(rawAction.Fields))
@@ -447,8 +457,9 @@ func (a *Actions) List(repository string) ([]Action, error) {
 				fields[j] = SlackFieldEntryInput{FieldName: f.FieldName, Value: f.Value}
 			}
 			action.SlackAction = SlackAction{
-				Url:    rawAction.Url,
-				Fields: fields,
+				Url:      rawAction.Url,
+				Fields:   fields,
+				UseProxy: rawAction.SlackUseProxy,
 			}
 		case ActionTypeSlackPostMessage:
 			fields := make([]SlackFieldEntryInput, len(rawAction.Fields))
@@ -465,6 +476,7 @@ func (a *Actions) List(repository string) ([]Action, error) {
 			action.VictorOpsAction = VictorOpsAction{
 				MessageType: rawAction.MessageType,
 				NotifyUrl:   rawAction.NotifyUrl,
+				UseProxy:    rawAction.VictorOpsUseProxy,
 			}
 		case ActionTypeWebhook:
 			headers := make([]HttpHeaderEntryInput, len(rawAction.Headers))
@@ -516,8 +528,12 @@ func (a *Actions) Add(repository string, action *Action) (*Action, error) {
 	case ActionTypeEmail:
 		mutation = createEmailActionMutation
 		variables["Recipients"] = action.EmailAction.Recipients
-		variables["SubjectTemplate"] = action.EmailAction.SubjectTemplate
-		variables["BodyTemplate"] = action.EmailAction.BodyTemplate
+		if action.EmailAction.SubjectTemplate != "" {
+			variables["SubjectTemplate"] = action.EmailAction.SubjectTemplate
+		}
+		if action.EmailAction.BodyTemplate != "" {
+			variables["BodyTemplate"] = action.EmailAction.BodyTemplate
+		}
 		variables["UseProxy"] = action.EmailAction.UseProxy
 
 	case ActionTypeHumioRepo:
