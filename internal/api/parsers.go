@@ -47,9 +47,13 @@ query GetParser($RepositoryName: String!, $ParserName: String!) {
     parser(name: $ParserName) {
       id
       name
-      sourceCode
-      testData
-      tagFields
+      script
+      testCases {
+        event {
+          rawString
+        }
+      }
+      fieldsToTag
     }
   }
 }
@@ -57,20 +61,20 @@ query GetParser($RepositoryName: String!, $ParserName: String!) {
 
 const createParserMutation = `
 mutation CreateParser(
-  $RepositoryName: String!
+  $RepositoryName: RepoOrViewName!
   $Name: String!
-  $SourceCode: String!
-  $TestData: [String!]
-  $TagFields: [String!]
-  $Force: Boolean
+  $Script: String!
+  $TestCases: [ParserTestCaseInput!]!
+  $FieldsToTag: [String!]!
+  $FieldsToBeRemovedBeforeParsing: [String!]!
 ) {
-  createParser(input: {
+  createParserV2(input: {
     repositoryName: $RepositoryName
     name: $Name
-    sourceCode: $SourceCode
-    testData: $TestData
-    tagFields: $TagFields
-    force: $Force
+    script: $Script
+    testCases: $TestCases
+    fieldsToTag: $FieldsToTag
+    fieldsToBeRemovedBeforeParsing: $FieldsToBeRemovedBeforeParsing
   }) {
     id
     name
@@ -79,11 +83,13 @@ mutation CreateParser(
 `
 
 const deleteParserMutation = `
-mutation DeleteParser($RepositoryName: String!, $ParserID: String!) {
+mutation DeleteParser($RepositoryName: RepoOrViewName!, $ParserID: String!) {
   deleteParser(input: {
     repositoryName: $RepositoryName
     id: $ParserID
-  })
+  }) {
+    __typename
+  }
 }
 `
 
@@ -102,21 +108,25 @@ type listParsersResponse struct {
 type getParserResponse struct {
 	Repository struct {
 		Parser *struct {
-			ID         string   `json:"id"`
-			Name       string   `json:"name"`
-			SourceCode string   `json:"sourceCode"`
-			TestData   []string `json:"testData"`
-			TagFields  []string `json:"tagFields"`
+			ID         string `json:"id"`
+			Name       string `json:"name"`
+			Script     string `json:"script"`
+			TestCases  []struct {
+				Event struct {
+					RawString string `json:"rawString"`
+				} `json:"event"`
+			} `json:"testCases"`
+			FieldsToTag []string `json:"fieldsToTag"`
 		} `json:"parser"`
 	} `json:"repository"`
 }
 
 // createParserResponse represents the response from create parser mutation
 type createParserResponse struct {
-	CreateParser struct {
+	CreateParserV2 struct {
 		ID   string `json:"id"`
 		Name string `json:"name"`
-	} `json:"createParser"`
+	} `json:"createParserV2"`
 }
 
 // List returns all parsers for the given repository
@@ -158,11 +168,11 @@ func (p *Parsers) Get(repository, name string) (*Parser, error) {
 	}
 
 	rawParser := resp.Repository.Parser
-	testCases := make([]ParserTestCase, len(rawParser.TestData))
-	for i, testData := range rawParser.TestData {
+	testCases := make([]ParserTestCase, len(rawParser.TestCases))
+	for i, tc := range rawParser.TestCases {
 		testCases[i] = ParserTestCase{
 			Event: ParserTestEvent{
-				RawString: testData,
+				RawString: tc.Event.RawString,
 			},
 		}
 	}
@@ -170,29 +180,35 @@ func (p *Parsers) Get(repository, name string) (*Parser, error) {
 	return &Parser{
 		ID:          rawParser.ID,
 		Name:        rawParser.Name,
-		Script:      rawParser.SourceCode,
-		FieldsToTag: rawParser.TagFields,
+		Script:      rawParser.Script,
+		FieldsToTag: rawParser.FieldsToTag,
 		TestCases:   testCases,
 	}, nil
 }
 
 // Add creates a new parser or updates an existing one
 func (p *Parsers) Add(repository string, parser *Parser, force bool) (*Parser, error) {
-	testData := make([]string, len(parser.TestCases))
+	testCases := make([]map[string]interface{}, len(parser.TestCases))
 	for i, tc := range parser.TestCases {
-		testData[i] = tc.Event.RawString
+		testCases[i] = map[string]interface{}{
+			"event": map[string]interface{}{
+				"rawString": tc.Event.RawString,
+			},
+		}
+	}
+
+	fieldsToTag := parser.FieldsToTag
+	if fieldsToTag == nil {
+		fieldsToTag = []string{}
 	}
 
 	variables := map[string]interface{}{
-		"RepositoryName": repository,
-		"Name":           parser.Name,
-		"SourceCode":     parser.Script,
-		"TagFields":      parser.FieldsToTag,
-		"Force":          force,
-	}
-
-	if len(testData) > 0 {
-		variables["TestData"] = testData
+		"RepositoryName":                 repository,
+		"Name":                           parser.Name,
+		"Script":                         parser.Script,
+		"TestCases":                      testCases,
+		"FieldsToTag":                    fieldsToTag,
+		"FieldsToBeRemovedBeforeParsing": []string{},
 	}
 
 	var resp createParserResponse
@@ -201,7 +217,7 @@ func (p *Parsers) Add(repository string, parser *Parser, force bool) (*Parser, e
 		return nil, err
 	}
 
-	parser.ID = resp.CreateParser.ID
+	parser.ID = resp.CreateParserV2.ID
 	return parser, nil
 }
 

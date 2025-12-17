@@ -37,6 +37,7 @@ type EmailAction struct {
 	Recipients      []string
 	SubjectTemplate string
 	BodyTemplate    string
+	UseProxy        bool
 }
 
 // HumioRepoAction represents a Humio repo action
@@ -94,6 +95,8 @@ type WebhookAction struct {
 	Url          string
 	Headers      []HttpHeaderEntryInput
 	BodyTemplate string
+	IgnoreSSL    bool
+	UseProxy     bool
 }
 
 // Actions provides operations for managing actions
@@ -111,7 +114,8 @@ query ListActions($SearchDomainName: String!) {
       ... on EmailAction {
         recipients
         subjectTemplate
-        bodyTemplate
+        emailBodyTemplate: bodyTemplate
+        emailUseProxy: useProxy
       }
       ... on HumioRepoAction {
         ingestToken
@@ -146,12 +150,14 @@ query ListActions($SearchDomainName: String!) {
       }
       ... on WebhookAction {
         method
-        url
+        webhookUrl: url
         headers {
           header
           value
         }
-        bodyTemplate
+        webhookBodyTemplate: bodyTemplate
+        ignoreSSL
+        webhookUseProxy: useProxy
       }
     }
   }
@@ -174,6 +180,7 @@ mutation CreateEmailAction(
   $Recipients: [String!]!
   $SubjectTemplate: String
   $BodyTemplate: String
+  $UseProxy: Boolean!
 ) {
   createEmailAction(input: {
     viewName: $SearchDomainName
@@ -181,6 +188,7 @@ mutation CreateEmailAction(
     recipients: $Recipients
     subjectTemplate: $SubjectTemplate
     bodyTemplate: $BodyTemplate
+    useProxy: $UseProxy
   }) {
     id
     name
@@ -312,6 +320,8 @@ mutation CreateWebhookAction(
   $Method: String!
   $Headers: [HttpHeaderEntryInput!]!
   $BodyTemplate: String!
+  $IgnoreSSL: Boolean!
+  $UseProxy: Boolean!
 ) {
   createWebhookAction(input: {
     viewName: $SearchDomainName
@@ -320,6 +330,8 @@ mutation CreateWebhookAction(
     method: $Method
     headers: $Headers
     bodyTemplate: $BodyTemplate
+    ignoreSSL: $IgnoreSSL
+    useProxy: $UseProxy
   }) {
     id
     name
@@ -331,29 +343,34 @@ mutation CreateWebhookAction(
 type actionResponse struct {
 	SearchDomain struct {
 		Actions []struct {
-			Typename        string   `json:"__typename"`
-			ID              string   `json:"id"`
-			Name            string   `json:"name"`
-			Recipients      []string `json:"recipients,omitempty"`
-			SubjectTemplate string   `json:"subjectTemplate,omitempty"`
-			BodyTemplate    string   `json:"bodyTemplate,omitempty"`
-			IngestToken     string   `json:"ingestToken,omitempty"`
-			ApiUrl          string   `json:"apiUrl,omitempty"`
-			GenieKey        string   `json:"genieKey,omitempty"`
-			RoutingKey      string   `json:"routingKey,omitempty"`
-			Severity        string   `json:"severity,omitempty"`
-			Url             string   `json:"url,omitempty"`
-			Fields          []struct {
+			Typename              string   `json:"__typename"`
+			ID                    string   `json:"id"`
+			Name                  string   `json:"name"`
+			Recipients            []string `json:"recipients,omitempty"`
+			SubjectTemplate       string   `json:"subjectTemplate,omitempty"`
+			EmailBodyTemplate     string   `json:"emailBodyTemplate,omitempty"`
+			EmailUseProxy         bool     `json:"emailUseProxy,omitempty"`
+			IngestToken           string   `json:"ingestToken,omitempty"`
+			ApiUrl                string   `json:"apiUrl,omitempty"`
+			GenieKey              string   `json:"genieKey,omitempty"`
+			RoutingKey            string   `json:"routingKey,omitempty"`
+			Severity              string   `json:"severity,omitempty"`
+			Url                   string   `json:"url,omitempty"`
+			Fields                []struct {
 				FieldName string `json:"fieldName"`
 				Value     string `json:"value"`
 			} `json:"fields,omitempty"`
-			ApiToken    string   `json:"apiToken,omitempty"`
-			Channels    []string `json:"channels,omitempty"`
-			UseProxy    bool     `json:"useProxy,omitempty"`
-			MessageType string   `json:"messageType,omitempty"`
-			NotifyUrl   string   `json:"notifyUrl,omitempty"`
-			Method      string   `json:"method,omitempty"`
-			Headers     []struct {
+			ApiToken              string   `json:"apiToken,omitempty"`
+			Channels              []string `json:"channels,omitempty"`
+			UseProxy              bool     `json:"useProxy,omitempty"`
+			MessageType           string   `json:"messageType,omitempty"`
+			NotifyUrl             string   `json:"notifyUrl,omitempty"`
+			Method                string   `json:"method,omitempty"`
+			WebhookUrl            string   `json:"webhookUrl,omitempty"`
+			WebhookBodyTemplate   string   `json:"webhookBodyTemplate,omitempty"`
+			IgnoreSSL             bool     `json:"ignoreSSL,omitempty"`
+			WebhookUseProxy       bool     `json:"webhookUseProxy,omitempty"`
+			Headers               []struct {
 				Header string `json:"header"`
 				Value  string `json:"value"`
 			} `json:"headers,omitempty"`
@@ -395,7 +412,8 @@ func (a *Actions) List(repository string) ([]Action, error) {
 			action.EmailAction = EmailAction{
 				Recipients:      rawAction.Recipients,
 				SubjectTemplate: rawAction.SubjectTemplate,
-				BodyTemplate:    rawAction.BodyTemplate,
+				BodyTemplate:    rawAction.EmailBodyTemplate,
+				UseProxy:        rawAction.EmailUseProxy,
 			}
 		case ActionTypeHumioRepo:
 			action.HumioRepoAction = HumioRepoAction{
@@ -443,9 +461,11 @@ func (a *Actions) List(repository string) ([]Action, error) {
 			}
 			action.WebhookAction = WebhookAction{
 				Method:       rawAction.Method,
-				Url:          rawAction.Url,
+				Url:          rawAction.WebhookUrl,
 				Headers:      headers,
-				BodyTemplate: rawAction.BodyTemplate,
+				BodyTemplate: rawAction.WebhookBodyTemplate,
+				IgnoreSSL:    rawAction.IgnoreSSL,
+				UseProxy:     rawAction.WebhookUseProxy,
 			}
 		}
 
@@ -486,6 +506,7 @@ func (a *Actions) Add(repository string, action *Action) (*Action, error) {
 		variables["Recipients"] = action.EmailAction.Recipients
 		variables["SubjectTemplate"] = action.EmailAction.SubjectTemplate
 		variables["BodyTemplate"] = action.EmailAction.BodyTemplate
+		variables["UseProxy"] = action.EmailAction.UseProxy
 
 	case ActionTypeHumioRepo:
 		mutation = createHumioRepoActionMutation
@@ -536,6 +557,8 @@ func (a *Actions) Add(repository string, action *Action) (*Action, error) {
 		}
 		variables["Headers"] = headers
 		variables["BodyTemplate"] = action.WebhookAction.BodyTemplate
+		variables["IgnoreSSL"] = action.WebhookAction.IgnoreSSL
+		variables["UseProxy"] = action.WebhookAction.UseProxy
 
 	default:
 		return nil, fmt.Errorf("unsupported action type: %s", action.Type)

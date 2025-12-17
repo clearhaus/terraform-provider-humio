@@ -31,21 +31,15 @@ query GetRepository($RepositoryName: String!) {
 const createRepositoryMutation = `
 mutation CreateRepository($Name: String!) {
   createRepository(name: $Name) {
-    id
-    name
+    __typename
   }
 }
 `
 
 const updateDescriptionMutation = `
 mutation UpdateDescription($RepositoryName: String!, $Description: String!) {
-  updateDescriptionForSearchDomain(input: {
-    name: $RepositoryName
-    description: $Description
-  }) {
-    id
-    name
-    description
+  updateDescriptionForSearchDomain(name: $RepositoryName, newDescription: $Description) {
+    __typename
   }
 }
 `
@@ -97,14 +91,6 @@ type getRepositoryResponse struct {
 	} `json:"repository"`
 }
 
-// createRepositoryResponse represents the response from create repository mutation
-type createRepositoryResponse struct {
-	CreateRepository struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
-	} `json:"createRepository"`
-}
-
 // List returns all repositories
 func (r *Repositories) List() ([]Repository, error) {
 	var resp listRepositoriesResponse
@@ -148,10 +134,9 @@ func (r *Repositories) Get(name string) (Repository, error) {
 
 // Create creates a new repository
 func (r *Repositories) Create(name string) error {
-	var resp createRepositoryResponse
 	return r.client.Query(context.Background(), createRepositoryMutation, map[string]interface{}{
 		"Name": name,
-	}, &resp)
+	}, nil)
 }
 
 // UpdateDescription updates the description of a repository

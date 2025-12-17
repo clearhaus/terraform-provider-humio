@@ -33,7 +33,7 @@ query ListIngestTokens($RepositoryName: String!) {
 
 const addIngestTokenMutation = `
 mutation AddIngestToken($RepositoryName: String!, $Name: String!, $Parser: String) {
-  addIngestToken(input: {
+  addIngestTokenV3(input: {
     repositoryName: $RepositoryName
     name: $Name
     parser: $Parser
@@ -102,13 +102,13 @@ type ingestTokenResponse struct {
 
 // addIngestTokenResponse represents the response from add ingest token mutation
 type addIngestTokenResponse struct {
-	AddIngestToken struct {
+	AddIngestTokenV3 struct {
 		Name   string `json:"name"`
 		Token  string `json:"token"`
 		Parser *struct {
 			Name string `json:"name"`
 		} `json:"parser"`
-	} `json:"addIngestToken"`
+	} `json:"addIngestTokenV3"`
 }
 
 // assignParserResponse represents the response from assign/unassign parser mutation
@@ -188,13 +188,13 @@ func (t *IngestTokens) Add(repository, name, parser string) (*IngestToken, error
 	}
 
 	assignedParser := ""
-	if resp.AddIngestToken.Parser != nil {
-		assignedParser = resp.AddIngestToken.Parser.Name
+	if resp.AddIngestTokenV3.Parser != nil {
+		assignedParser = resp.AddIngestTokenV3.Parser.Name
 	}
 
 	return &IngestToken{
-		Name:           resp.AddIngestToken.Name,
-		Token:          resp.AddIngestToken.Token,
+		Name:           resp.AddIngestTokenV3.Name,
+		Token:          resp.AddIngestTokenV3.Token,
 		AssignedParser: assignedParser,
 	}, nil
 }

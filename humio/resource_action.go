@@ -269,6 +269,16 @@ func resourceAction() *schema.Resource {
 							Required:         true,
 							ValidateDiagFunc: validateURL,
 						},
+						"ignore_ssl": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"use_proxy": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 					},
 				},
 			},
@@ -498,6 +508,8 @@ func actionFromResourceData(d *schema.ResourceData) (humio.Action, error) {
 			Headers:      headers,
 			Method:       properties[0]["method"].(string),
 			Url:          properties[0]["url"].(string),
+			IgnoreSSL:    properties[0]["ignore_ssl"].(bool),
+			UseProxy:     properties[0]["use_proxy"].(bool),
 		}
 	default:
 		return humio.Action{}, fmt.Errorf("unsupported action type: %s", d.Get("type"))
@@ -594,5 +606,7 @@ func webhookFromAction(a *humio.Action) []tfMap {
 	s["headers"] = headers
 	s["method"] = a.WebhookAction.Method
 	s["url"] = a.WebhookAction.Url
+	s["ignore_ssl"] = a.WebhookAction.IgnoreSSL
+	s["use_proxy"] = a.WebhookAction.UseProxy
 	return []tfMap{s}
 }
