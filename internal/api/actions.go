@@ -49,12 +49,14 @@ type HumioRepoAction struct {
 type OpsGenieAction struct {
 	ApiUrl   string
 	GenieKey string
+	UseProxy bool
 }
 
 // PagerDutyAction represents a PagerDuty action
 type PagerDutyAction struct {
 	RoutingKey string
 	Severity   string
+	UseProxy   bool
 }
 
 // SlackFieldEntryInput represents a Slack field entry
@@ -65,8 +67,9 @@ type SlackFieldEntryInput struct {
 
 // SlackAction represents a Slack webhook action
 type SlackAction struct {
-	Url    string
-	Fields []SlackFieldEntryInput
+	Url      string
+	Fields   []SlackFieldEntryInput
+	UseProxy bool
 }
 
 // SlackPostMessageAction represents a Slack post message action
@@ -81,6 +84,7 @@ type SlackPostMessageAction struct {
 type VictorOpsAction struct {
 	MessageType string
 	NotifyUrl   string
+	UseProxy    bool
 }
 
 // HttpHeaderEntryInput represents an HTTP header entry
@@ -219,12 +223,14 @@ mutation CreateOpsGenieAction(
   $Name: String!
   $ApiUrl: String!
   $GenieKey: String!
+  $UseProxy: Boolean!
 ) {
   createOpsGenieAction(input: {
     viewName: $SearchDomainName
     name: $Name
     apiUrl: $ApiUrl
     genieKey: $GenieKey
+    useProxy: $UseProxy
   }) {
     id
     name
@@ -238,12 +244,14 @@ mutation CreatePagerDutyAction(
   $Name: String!
   $RoutingKey: String!
   $Severity: String!
+  $UseProxy: Boolean!
 ) {
   createPagerDutyAction(input: {
     viewName: $SearchDomainName
     name: $Name
     routingKey: $RoutingKey
     severity: $Severity
+    useProxy: $UseProxy
   }) {
     id
     name
@@ -257,12 +265,14 @@ mutation CreateSlackAction(
   $Name: String!
   $Url: String!
   $Fields: [SlackFieldEntryInput!]!
+  $UseProxy: Boolean!
 ) {
   createSlackAction(input: {
     viewName: $SearchDomainName
     name: $Name
     url: $Url
     fields: $Fields
+    useProxy: $UseProxy
   }) {
     id
     name
@@ -299,12 +309,14 @@ mutation CreateVictorOpsAction(
   $Name: String!
   $MessageType: String!
   $NotifyUrl: String!
+  $UseProxy: Boolean!
 ) {
   createVictorOpsAction(input: {
     viewName: $SearchDomainName
     name: $Name
     messageType: $MessageType
     notifyUrl: $NotifyUrl
+    useProxy: $UseProxy
   }) {
     id
     name
@@ -516,11 +528,13 @@ func (a *Actions) Add(repository string, action *Action) (*Action, error) {
 		mutation = createOpsGenieActionMutation
 		variables["ApiUrl"] = action.OpsGenieAction.ApiUrl
 		variables["GenieKey"] = action.OpsGenieAction.GenieKey
+		variables["UseProxy"] = action.OpsGenieAction.UseProxy
 
 	case ActionTypePagerDuty:
 		mutation = createPagerDutyActionMutation
 		variables["RoutingKey"] = action.PagerDutyAction.RoutingKey
 		variables["Severity"] = action.PagerDutyAction.Severity
+		variables["UseProxy"] = action.PagerDutyAction.UseProxy
 
 	case ActionTypeSlack:
 		mutation = createSlackActionMutation
@@ -530,6 +544,7 @@ func (a *Actions) Add(repository string, action *Action) (*Action, error) {
 			fields[i] = map[string]string{"fieldName": f.FieldName, "value": f.Value}
 		}
 		variables["Fields"] = fields
+		variables["UseProxy"] = action.SlackAction.UseProxy
 
 	case ActionTypeSlackPostMessage:
 		mutation = createSlackPostMessageActionMutation
@@ -546,6 +561,7 @@ func (a *Actions) Add(repository string, action *Action) (*Action, error) {
 		mutation = createVictorOpsActionMutation
 		variables["MessageType"] = action.VictorOpsAction.MessageType
 		variables["NotifyUrl"] = action.VictorOpsAction.NotifyUrl
+		variables["UseProxy"] = action.VictorOpsAction.UseProxy
 
 	case ActionTypeWebhook:
 		mutation = createWebhookActionMutation

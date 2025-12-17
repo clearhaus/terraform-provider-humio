@@ -41,15 +41,8 @@ query ListAlerts($SearchDomainName: String!) {
       actions
       labels
       queryOwnership {
+        __typename
         id
-        ... on QueryOwnershipTypeUser {
-          user {
-            id
-          }
-        }
-        ... on QueryOwnershipTypeOrganization {
-          id
-        }
       }
     }
   }
@@ -115,10 +108,8 @@ type alertResponse struct {
 			Actions            []string `json:"actions"`
 			Labels             []string `json:"labels"`
 			QueryOwnership     struct {
-				ID   string `json:"id"`
-				User *struct {
-					ID string `json:"id"`
-				} `json:"user,omitempty"`
+				Typename string `json:"__typename"`
+				ID       string `json:"id"`
 			} `json:"queryOwnership"`
 		} `json:"alerts"`
 	} `json:"searchDomain"`
@@ -146,9 +137,9 @@ func (a *Alerts) List(repository string) ([]Alert, error) {
 	for i, alert := range resp.SearchDomain.Alerts {
 		ownershipType := "Organization"
 		runAsUserID := ""
-		if alert.QueryOwnership.User != nil {
+		if alert.QueryOwnership.Typename == "UserOwnership" {
 			ownershipType = "User"
-			runAsUserID = alert.QueryOwnership.User.ID
+			runAsUserID = alert.QueryOwnership.ID
 		}
 
 		alerts[i] = Alert{
@@ -188,6 +179,15 @@ func (a *Alerts) Get(repository, name string) (*Alert, error) {
 
 // Add creates a new alert
 func (a *Alerts) Add(repository string, alert *Alert) (*Alert, error) {
+	actions := alert.Actions
+	if actions == nil {
+		actions = []string{}
+	}
+	labels := alert.Labels
+	if labels == nil {
+		labels = []string{}
+	}
+
 	variables := map[string]interface{}{
 		"SearchDomainName":   repository,
 		"Name":               alert.Name,
@@ -197,8 +197,8 @@ func (a *Alerts) Add(repository string, alert *Alert) (*Alert, error) {
 		"ThrottleTimeMillis": alert.ThrottleTimeMillis,
 		"ThrottleField":      alert.ThrottleField,
 		"Enabled":            alert.Enabled,
-		"Actions":            alert.Actions,
-		"Labels":             alert.Labels,
+		"Actions":            actions,
+		"Labels":             labels,
 	}
 
 	if alert.RunAsUserID != "" {
