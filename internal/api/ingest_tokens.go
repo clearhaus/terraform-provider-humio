@@ -80,10 +80,9 @@ mutation UnassignParser($RepositoryName: String!, $TokenName: String!) {
 
 const removeIngestTokenMutation = `
 mutation RemoveIngestToken($RepositoryName: String!, $Name: String!) {
-  removeIngestToken(input: {
-    repositoryName: $RepositoryName
-    name: $Name
-  })
+  removeIngestToken(repositoryName: $RepositoryName, name: $Name) {
+    __typename
+  }
 }
 `
 
