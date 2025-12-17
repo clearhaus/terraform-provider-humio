@@ -105,7 +105,11 @@ func (c *Client) Query(ctx context.Context, query string, variables map[string]i
 	}
 
 	if len(gqlResp.Errors) > 0 {
-		return fmt.Errorf("GraphQL error: %s", gqlResp.Errors[0].Message)
+		messages := make([]string, len(gqlResp.Errors))
+		for i, e := range gqlResp.Errors {
+			messages[i] = e.Message
+		}
+		return fmt.Errorf("GraphQL errors: %v", messages)
 	}
 
 	if target != nil {
