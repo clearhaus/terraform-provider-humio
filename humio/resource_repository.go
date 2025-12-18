@@ -78,7 +78,6 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, clien
 	err = client.(*humio.Client).Repositories().UpdateTimeBasedRetention(
 		repository.Name,
 		repository.RetentionDays,
-		d.Get("allow_data_deletion").(bool),
 	)
 	if err != nil {
 		return diag.Errorf("could not set time based retention for repository: %s", err)
@@ -106,8 +105,12 @@ func resourceDataFromRepository(a *humio.Repository, d *schema.ResourceData) dia
 	if err != nil {
 		return diag.Errorf("error setting description for resource %s: %s", d.Id(), err)
 	}
-	if err := d.Set("retention", retentionFromRepository(a)); err != nil {
-		return diag.Errorf("error setting retention settings for resource %s: %s", d.Id(), err)
+	// Only set retention in state if the config has a retention block
+	// This prevents drift when the API returns a default retention value
+	if _, ok := d.GetOk("retention"); ok {
+		if err := d.Set("retention", retentionFromRepository(a)); err != nil {
+			return diag.Errorf("error setting retention settings for resource %s: %s", d.Id(), err)
+		}
 	}
 	return nil
 }
@@ -134,7 +137,6 @@ func resourceRepositoryUpdate(ctx context.Context, d *schema.ResourceData, clien
 	err = client.(*humio.Client).Repositories().UpdateTimeBasedRetention(
 		repository.Name,
 		repository.RetentionDays,
-		d.Get("allow_data_deletion").(bool),
 	)
 	if err != nil {
 		return diag.Errorf("could not update time based retention for repository: %s", err)
@@ -153,7 +155,6 @@ func resourceRepositoryDelete(_ context.Context, d *schema.ResourceData, client 
 	err = client.(*humio.Client).Repositories().Delete(
 		repository.Name,
 		deleteReason,
-		d.Get("allow_data_deletion").(bool),
 	)
 	if err != nil {
 		return diag.Errorf("could not delete repository: %s", err)

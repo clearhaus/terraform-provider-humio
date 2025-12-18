@@ -59,8 +59,9 @@ type graphQLResponse struct {
 
 // graphQLError represents a GraphQL error
 type graphQLError struct {
-	Message string        `json:"message"`
-	Path    []interface{} `json:"path,omitempty"`
+	Message    string                 `json:"message"`
+	Path       []interface{}          `json:"path,omitempty"`
+	Extensions map[string]interface{} `json:"extensions,omitempty"`
 }
 
 // Query executes a GraphQL query and unmarshals the result into the provided target
@@ -107,7 +108,11 @@ func (c *Client) Query(ctx context.Context, query string, variables map[string]i
 	if len(gqlResp.Errors) > 0 {
 		messages := make([]string, len(gqlResp.Errors))
 		for i, e := range gqlResp.Errors {
-			messages[i] = e.Message
+			msg := e.Message
+			if len(e.Extensions) > 0 {
+				msg = fmt.Sprintf("%s (extensions: %v)", msg, e.Extensions)
+			}
+			messages[i] = msg
 		}
 		return fmt.Errorf("GraphQL errors: %v", messages)
 	}

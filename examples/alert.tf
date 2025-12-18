@@ -67,14 +67,16 @@ resource "humio_alert" "example_alert_with_user_owner" {
 }
 
 
-resource "humio_alert" "example_alert_with_organization_owner" {
-  repository = humio_action.example_email_body.repository
-  name       = "example_alert_with_organization_owner"
-
-  throttle_time_millis = 300000
-  enabled              = true
-  query                = "count()"
-  start                = "1d"
-
-  query_ownership_type = "Organization"
-}
+# Note: Organization query ownership is not allowed for sandbox repositories.
+# This example would work on a non-sandbox repository.
+# resource "humio_alert" "example_alert_with_organization_owner" {
+#   repository = humio_action.example_email_body.repository
+#   name       = "example_alert_with_organization_owner"
+#
+#   throttle_time_millis = 300000
+#   enabled              = true
+#   query                = "count()"
+#   start                = "1d"
+#
+#   query_ownership_type = "Organization"
+# }

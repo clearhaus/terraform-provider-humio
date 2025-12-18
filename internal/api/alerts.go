@@ -195,12 +195,14 @@ func (a *Alerts) Add(repository string, alert *Alert) (*Alert, error) {
 		"QueryString":        alert.QueryString,
 		"QueryStart":         alert.QueryStart,
 		"ThrottleTimeMillis": alert.ThrottleTimeMillis,
-		"ThrottleField":      alert.ThrottleField,
 		"Enabled":            alert.Enabled,
 		"Actions":            actions,
 		"Labels":             labels,
 	}
 
+	if alert.ThrottleField != "" {
+		variables["ThrottleField"] = alert.ThrottleField
+	}
 	if alert.RunAsUserID != "" {
 		variables["RunAsUserID"] = alert.RunAsUserID
 	}
@@ -235,19 +237,16 @@ func (a *Alerts) Update(repository string, alert *Alert) (*Alert, error) {
 	return a.Add(repository, alert)
 }
 
-// Delete deletes an alert by ID
-func (a *Alerts) Delete(repository, alertID string) error {
-	// If alertID looks like a name, get the actual ID first
-	if len(alertID) < 20 { // IDs are typically UUIDs
-		alert, err := a.Get(repository, alertID)
-		if err != nil {
-			return err
-		}
-		alertID = alert.ID
+// Delete deletes an alert by name
+func (a *Alerts) Delete(repository, alertName string) error {
+	// Look up the alert by name to get its ID
+	alert, err := a.Get(repository, alertName)
+	if err != nil {
+		return err
 	}
 
 	return a.client.Query(context.Background(), deleteAlertMutation, map[string]interface{}{
 		"SearchDomainName": repository,
-		"AlertID":          alertID,
+		"AlertID":          alert.ID,
 	}, nil)
 }

@@ -657,21 +657,16 @@ func (a *Actions) Update(repository string, action *Action) (*Action, error) {
 	return a.Add(repository, action)
 }
 
-// Delete deletes an action by name or ID
-func (a *Actions) Delete(repository, actionNameOrID string) error {
-	actionID := actionNameOrID
-
-	// If it doesn't look like an ID, try to find the action by name
-	if len(actionNameOrID) < 20 {
-		action, err := a.Get(repository, actionNameOrID)
-		if err != nil {
-			return err
-		}
-		actionID = action.ID
+// Delete deletes an action by name
+func (a *Actions) Delete(repository, actionName string) error {
+	// Look up the action by name to get its ID
+	action, err := a.Get(repository, actionName)
+	if err != nil {
+		return err
 	}
 
 	return a.client.Query(context.Background(), deleteActionMutation, map[string]interface{}{
 		"SearchDomainName": repository,
-		"ActionID":         actionID,
+		"ActionID":         action.ID,
 	}, nil)
 }

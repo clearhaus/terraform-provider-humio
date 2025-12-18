@@ -45,22 +45,27 @@ mutation UpdateDescription($RepositoryName: String!, $Description: String!) {
 `
 
 const updateTimeBasedRetentionMutation = `
-mutation UpdateTimeBasedRetention($RepositoryName: String!, $RetentionDays: Float, $AllowDataDeletion: Boolean!) {
-  updateRetentionForSearchDomain(input: {
+mutation UpdateTimeBasedRetention($RepositoryName: String!, $RetentionDays: Float) {
+  updateRetention(
     repositoryName: $RepositoryName
     timeBasedRetention: $RetentionDays
-    allowDataDeletion: $AllowDataDeletion
-  }) {
-    id
-    name
-    timeBasedRetention
+  ) {
+    repository {
+      id
+      name
+      ... on Repository {
+        timeBasedRetention
+      }
+    }
   }
 }
 `
 
 const deleteRepositoryMutation = `
-mutation DeleteRepository($RepositoryName: String!, $Reason: String!, $AllowDataDeletion: Boolean!) {
-  deleteSearchDomain(name: $RepositoryName, deleteMessage: $Reason, allowDataDeletion: $AllowDataDeletion)
+mutation DeleteRepository($RepositoryName: String!, $Reason: String) {
+  deleteSearchDomain(name: $RepositoryName, deleteMessage: $Reason) {
+    result
+  }
 }
 `
 
@@ -148,10 +153,9 @@ func (r *Repositories) UpdateDescription(name, description string) error {
 }
 
 // UpdateTimeBasedRetention updates the time-based retention for a repository
-func (r *Repositories) UpdateTimeBasedRetention(name string, retentionDays float64, allowDataDeletion bool) error {
+func (r *Repositories) UpdateTimeBasedRetention(name string, retentionDays float64) error {
 	variables := map[string]interface{}{
-		"RepositoryName":    name,
-		"AllowDataDeletion": allowDataDeletion,
+		"RepositoryName": name,
 	}
 
 	// Only set retention if it's > 0, otherwise null means unlimited
@@ -163,10 +167,9 @@ func (r *Repositories) UpdateTimeBasedRetention(name string, retentionDays float
 }
 
 // Delete deletes a repository
-func (r *Repositories) Delete(name, reason string, allowDataDeletion bool) error {
+func (r *Repositories) Delete(name, reason string) error {
 	return r.client.Query(context.Background(), deleteRepositoryMutation, map[string]interface{}{
-		"RepositoryName":    name,
-		"Reason":            reason,
-		"AllowDataDeletion": allowDataDeletion,
+		"RepositoryName": name,
+		"Reason":         reason,
 	}, nil)
 }
