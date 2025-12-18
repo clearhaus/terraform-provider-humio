@@ -26,7 +26,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	humio "github.com/humio/cli/api"
+	humio "github.com/clearhaus/terraform-provider-humio/internal/api"
 )
 
 var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
@@ -99,6 +99,11 @@ func resourceAction() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"use_proxy": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 					},
 				},
 			},
@@ -133,6 +138,11 @@ func resourceAction() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
+						"use_proxy": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 					},
 				},
 			},
@@ -157,6 +167,11 @@ func resourceAction() *schema.Resource {
 								"info",
 							}, false)),
 						},
+						"use_proxy": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 					},
 				},
 			},
@@ -178,6 +193,11 @@ func resourceAction() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ValidateDiagFunc: validateURL,
+						},
+						"use_proxy": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
 						},
 					},
 				},
@@ -232,6 +252,11 @@ func resourceAction() *schema.Resource {
 							Required:         true,
 							ValidateDiagFunc: validateURL,
 						},
+						"use_proxy": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 					},
 				},
 			},
@@ -268,6 +293,16 @@ func resourceAction() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ValidateDiagFunc: validateURL,
+						},
+						"ignore_ssl": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"use_proxy": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
 						},
 					},
 				},
@@ -428,6 +463,7 @@ func actionFromResourceData(d *schema.ResourceData) (humio.Action, error) {
 			Recipients:      recipients,
 			BodyTemplate:    properties[0]["body_template"].(string),
 			SubjectTemplate: properties[0]["subject_template"].(string),
+			UseProxy:        properties[0]["use_proxy"].(bool),
 		}
 	case humio.ActionTypeHumioRepo:
 		properties := getActionPropertiesFromResourceData(d, "humiorepo", "ingest_token")
@@ -439,12 +475,14 @@ func actionFromResourceData(d *schema.ResourceData) (humio.Action, error) {
 		action.OpsGenieAction = humio.OpsGenieAction{
 			ApiUrl:   properties[0]["api_url"].(string),
 			GenieKey: properties[0]["genie_key"].(string),
+			UseProxy: properties[0]["use_proxy"].(bool),
 		}
 	case humio.ActionTypePagerDuty:
 		properties := getActionPropertiesFromResourceData(d, "pagerduty", "routing_key")
 		action.PagerDutyAction = humio.PagerDutyAction{
 			RoutingKey: properties[0]["routing_key"].(string),
 			Severity:   properties[0]["severity"].(string),
+			UseProxy:   properties[0]["use_proxy"].(bool),
 		}
 	case humio.ActionTypeSlack:
 		properties := getActionPropertiesFromResourceData(d, "slack", "url")
@@ -456,8 +494,9 @@ func actionFromResourceData(d *schema.ResourceData) (humio.Action, error) {
 			})
 		}
 		action.SlackAction = humio.SlackAction{
-			Url:    properties[0]["url"].(string),
-			Fields: fields,
+			Url:      properties[0]["url"].(string),
+			Fields:   fields,
+			UseProxy: properties[0]["use_proxy"].(bool),
 		}
 	case humio.ActionTypeSlackPostMessage:
 		properties := getActionPropertiesFromResourceData(d, "slackpostmessage", "api_token")
@@ -483,6 +522,7 @@ func actionFromResourceData(d *schema.ResourceData) (humio.Action, error) {
 		action.VictorOpsAction = humio.VictorOpsAction{
 			MessageType: properties[0]["message_type"].(string),
 			NotifyUrl:   properties[0]["notify_url"].(string),
+			UseProxy:    properties[0]["use_proxy"].(bool),
 		}
 	case humio.ActionTypeWebhook:
 		properties := getActionPropertiesFromResourceData(d, "webhook", "url")
@@ -498,6 +538,8 @@ func actionFromResourceData(d *schema.ResourceData) (humio.Action, error) {
 			Headers:      headers,
 			Method:       properties[0]["method"].(string),
 			Url:          properties[0]["url"].(string),
+			IgnoreSSL:    properties[0]["ignore_ssl"].(bool),
+			UseProxy:     properties[0]["use_proxy"].(bool),
 		}
 	default:
 		return humio.Action{}, fmt.Errorf("unsupported action type: %s", d.Get("type"))
@@ -530,6 +572,7 @@ func emailFromAction(a *humio.Action) []tfMap {
 	s["recipients"] = a.EmailAction.Recipients
 	s["body_template"] = a.EmailAction.BodyTemplate
 	s["subject_template"] = a.EmailAction.SubjectTemplate
+	s["use_proxy"] = a.EmailAction.UseProxy
 	return []tfMap{s}
 }
 
@@ -543,6 +586,7 @@ func opsgenieFromAction(a *humio.Action) []tfMap {
 	s := tfMap{}
 	s["api_url"] = a.OpsGenieAction.ApiUrl
 	s["genie_key"] = a.OpsGenieAction.GenieKey
+	s["use_proxy"] = a.OpsGenieAction.UseProxy
 	return []tfMap{s}
 }
 
@@ -550,6 +594,7 @@ func pagerdutyFromAction(a *humio.Action) []tfMap {
 	s := tfMap{}
 	s["routing_key"] = a.PagerDutyAction.RoutingKey
 	s["severity"] = a.PagerDutyAction.Severity
+	s["use_proxy"] = a.PagerDutyAction.UseProxy
 	return []tfMap{s}
 }
 
@@ -561,6 +606,7 @@ func slackFromAction(a *humio.Action) []tfMap {
 	}
 	s["fields"] = fields
 	s["url"] = a.SlackAction.Url
+	s["use_proxy"] = a.SlackAction.UseProxy
 	return []tfMap{s}
 }
 
@@ -581,6 +627,7 @@ func victoropsFromAction(a *humio.Action) []tfMap {
 	s := tfMap{}
 	s["message_type"] = a.VictorOpsAction.MessageType
 	s["notify_url"] = a.VictorOpsAction.NotifyUrl
+	s["use_proxy"] = a.VictorOpsAction.UseProxy
 	return []tfMap{s}
 }
 
@@ -594,5 +641,7 @@ func webhookFromAction(a *humio.Action) []tfMap {
 	s["headers"] = headers
 	s["method"] = a.WebhookAction.Method
 	s["url"] = a.WebhookAction.Url
+	s["ignore_ssl"] = a.WebhookAction.IgnoreSSL
+	s["use_proxy"] = a.WebhookAction.UseProxy
 	return []tfMap{s}
 }
