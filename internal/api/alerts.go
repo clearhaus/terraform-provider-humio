@@ -222,14 +222,8 @@ func (a *Alerts) Add(repository string, alert *Alert) (*Alert, error) {
 
 // Update updates an existing alert by deleting and recreating it
 func (a *Alerts) Update(repository string, alert *Alert) (*Alert, error) {
-	// First get the existing alert to get its ID
-	existing, err := a.Get(repository, alert.Name)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get existing alert: %w", err)
-	}
-
 	// Delete the existing alert
-	if err := a.Delete(repository, existing.ID); err != nil {
+	if err := a.Delete(repository, alert.Name); err != nil {
 		return nil, fmt.Errorf("failed to delete existing alert: %w", err)
 	}
 
