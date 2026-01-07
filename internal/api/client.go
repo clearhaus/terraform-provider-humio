@@ -62,6 +62,8 @@ type graphQLError struct {
 	Message    string                 `json:"message"`
 	Path       []interface{}          `json:"path,omitempty"`
 	Extensions map[string]interface{} `json:"extensions,omitempty"`
+	State      map[string]interface{} `json:"state,omitempty"`
+	ErrorCode  string                 `json:"errorCode,omitempty"`
 }
 
 // Query executes a GraphQL query and unmarshals the result into the provided target
@@ -109,6 +111,15 @@ func (c *Client) Query(ctx context.Context, query string, variables map[string]i
 		messages := make([]string, len(gqlResp.Errors))
 		for i, e := range gqlResp.Errors {
 			msg := e.Message
+			// Include validation details from state (e.g., "name": "Name 'foo' is already taken.")
+			if len(e.State) > 0 {
+				for field, detail := range e.State {
+					msg = fmt.Sprintf("%s: %s=%v", msg, field, detail)
+				}
+			}
+			if e.ErrorCode != "" {
+				msg = fmt.Sprintf("%s (errorCode: %s)", msg, e.ErrorCode)
+			}
 			if len(e.Extensions) > 0 {
 				msg = fmt.Sprintf("%s (extensions: %v)", msg, e.Extensions)
 			}
