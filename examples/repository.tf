@@ -1,9 +1,9 @@
 resource "humio_repository" "example_repo_minimal_fields_set" {
-  name = "example_repo_minimal_fields_set"
+  name = "example-repo-minimal-${local.email_prefix}"
 }
 
 resource "humio_repository" "example_repo_all_fields_set" {
-  name        = "example_repo_all_fields_set"
+  name        = "example-repo-all-${local.email_prefix}"
   description = "This is an example"
 
   retention {

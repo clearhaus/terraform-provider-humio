@@ -161,3 +161,8 @@ func (c *Client) Repositories() *Repositories {
 func (c *Client) IngestTokens() *IngestTokens {
 	return &IngestTokens{client: c}
 }
+
+// Users returns the Users API
+func (c *Client) Users() *Users {
+	return &Users{client: c}
+}
