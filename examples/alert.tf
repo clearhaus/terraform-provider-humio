@@ -66,9 +66,13 @@ resource "humio_alert" "example_alert_with_user_owner" {
   query_ownership_type = "User"
 }
 
+resource "humio_repository" "org_ownership_test" {
+  name        = "example_repo_org_ownership_${local.email_prefix}"
+  description = "Repository for organization query ownership"
+}
 
 resource "humio_alert" "example_alert_with_organization_owner" {
-  repository = humio_action.example_email_body.repository
+  repository = humio_repository.org_ownership_test.name
   name       = "example_alert_with_organization_owner"
 
   throttle_time_millis = 300000

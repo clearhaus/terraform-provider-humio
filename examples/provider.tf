@@ -1,8 +1,7 @@
 terraform {
   required_providers {
     humio = {
-      source  = "clearhaus/humio"
-      version = "0.5.0"
+      source = "clearhaus/humio"
     }
   }
 }

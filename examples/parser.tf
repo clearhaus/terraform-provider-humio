@@ -34,7 +34,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "gc_kafka" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "gc-kafka"
   test_data = [
     "[2018-12-05T07:37:48.685+0000][gc            ] GC(111957) Pause Young (G1 Evacuation Pause) 711M->559M(796M) 9.860ms",
@@ -77,7 +77,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "jenkins_build_log" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "jenkins-build-log"
   tag_fields = ["build", "task"]
   test_data = [
@@ -98,7 +98,7 @@ regex("\\[(?<@timestamp>[^\\]]+)\\]\\s+(?<loglevel>\\S+)\\s+(\\[(?<thread>[^]]+)
 PARSERSCRIPT
 }
 resource "humio_parser" "kafka_gc" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "kafka-gc"
   test_data = [
     "[2018-12-05T07:37:48.685+0000][gc            ] GC(111957) Pause Young (G1 Evacuation Pause) 711M->559M(796M) 9.860ms",
@@ -132,7 +132,7 @@ PARSERSCRIPT
 }
 
 resource "humio_parser" "webfront" {
-  repository = "humio"
+  repository = "sandbox"
   name       = "webfront"
   tag_fields = ["@host", "type"]
   test_data = [

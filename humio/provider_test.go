@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/humio/terraform-provider-humio/humio/acceptance"
+	"github.com/clearhaus/terraform-provider-humio/humio/acceptance"
 )
 
 func TestProviderInternalValidation(t *testing.T) {
