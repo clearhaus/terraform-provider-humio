@@ -82,6 +82,31 @@ mutation CreateParser(
 }
 `
 
+const updateParserMutation = `
+mutation UpdateParser(
+  $RepositoryName: RepoOrViewName!
+  $ID: String!
+  $Name: String!
+  $Script: UpdateParserScriptInput!
+  $TestCases: [ParserTestCaseInput!]!
+  $FieldsToTag: [String!]!
+  $FieldsToBeRemovedBeforeParsing: [String!]!
+) {
+  updateParserV2(input: {
+    repositoryName: $RepositoryName
+    id: $ID
+    name: $Name
+    script: $Script
+    testCases: $TestCases
+    fieldsToTag: $FieldsToTag
+    fieldsToBeRemovedBeforeParsing: $FieldsToBeRemovedBeforeParsing
+  }) {
+    id
+    name
+  }
+}
+`
+
 const deleteParserMutation = `
 mutation DeleteParser($RepositoryName: RepoOrViewName!, $ParserID: String!) {
   deleteParser(input: {
@@ -127,6 +152,14 @@ type createParserResponse struct {
 		ID   string `json:"id"`
 		Name string `json:"name"`
 	} `json:"createParserV2"`
+}
+
+// updateParserResponse represents the response from update parser mutation
+type updateParserResponse struct {
+	UpdateParserV2 struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	} `json:"updateParserV2"`
 }
 
 // List returns all parsers for the given repository
@@ -218,6 +251,44 @@ func (p *Parsers) Add(repository string, parser *Parser, force bool) (*Parser, e
 	}
 
 	parser.ID = resp.CreateParserV2.ID
+	return parser, nil
+}
+
+// Update updates an existing parser
+func (p *Parsers) Update(repository string, parser *Parser) (*Parser, error) {
+	testCases := make([]map[string]interface{}, len(parser.TestCases))
+	for i, tc := range parser.TestCases {
+		testCases[i] = map[string]interface{}{
+			"event": map[string]interface{}{
+				"rawString": tc.Event.RawString,
+			},
+		}
+	}
+
+	fieldsToTag := parser.FieldsToTag
+	if fieldsToTag == nil {
+		fieldsToTag = []string{}
+	}
+
+	variables := map[string]interface{}{
+		"RepositoryName": repository,
+		"ID":             parser.ID,
+		"Name":           parser.Name,
+		"Script": map[string]interface{}{
+			"script": parser.Script,
+		},
+		"TestCases":                      testCases,
+		"FieldsToTag":                    fieldsToTag,
+		"FieldsToBeRemovedBeforeParsing": []string{},
+	}
+
+	var resp updateParserResponse
+	err := p.client.Query(context.Background(), updateParserMutation, variables, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	parser.ID = resp.UpdateParserV2.ID
 	return parser, nil
 }
 

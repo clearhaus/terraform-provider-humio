@@ -140,10 +140,19 @@ func resourceParserUpdate(ctx context.Context, d *schema.ResourceData, client in
 		return diag.Errorf("could not obtain parser from resource data: %s", err)
 	}
 
-	_, err = client.(*humio.Client).Parsers().Add(
+	// Get existing parser to obtain its ID
+	existingParser, err := client.(*humio.Client).Parsers().Get(
+		d.Get("repository").(string),
+		d.Get("name").(string),
+	)
+	if err != nil {
+		return diag.Errorf("could not get existing parser for update: %s", err)
+	}
+	parser.ID = existingParser.ID
+
+	_, err = client.(*humio.Client).Parsers().Update(
 		d.Get("repository").(string),
 		&parser,
-		true,
 	)
 	if err != nil {
 		return diag.Errorf("could not update parser: %s", err)
