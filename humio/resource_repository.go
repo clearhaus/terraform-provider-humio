@@ -31,11 +31,6 @@ func resourceRepository() *schema.Resource {
 				Optional: true,
 				Default:  "",
 			},
-			"allow_data_deletion": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 			"retention": {
 				Type:     schema.TypeSet,
 				Optional: true,
