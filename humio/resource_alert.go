@@ -101,7 +101,7 @@ func resourceAlert() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
 					value := v.(string)
-					if value == "Organization" || value == "User" || value == "" {
+					if value == "Organization" || value == "User" {
 						return nil
 					}
 					return diag.Errorf("query_ownership_type must be 'User' or 'Organization' (case sensitive)")
