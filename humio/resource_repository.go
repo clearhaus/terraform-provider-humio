@@ -164,8 +164,8 @@ func repositoryFromResourceData(d *schema.ResourceData) (humio.Repository, error
 	}
 
 	return humio.Repository{
-		Name:                   d.Get("name").(string),
-		Description:            d.Get("description").(string),
-		RetentionDays:          retentionDays,
+		Name:          d.Get("name").(string),
+		Description:   d.Get("description").(string),
+		RetentionDays: retentionDays,
 	}, nil
 }

@@ -549,38 +549,38 @@ mutation UpdateWebhookAction(
 type actionResponse struct {
 	SearchDomain struct {
 		Actions []struct {
-			Typename              string   `json:"__typename"`
-			ID                    string   `json:"id"`
-			Name                  string   `json:"name"`
-			Recipients            []string `json:"recipients,omitempty"`
-			SubjectTemplate       string   `json:"subjectTemplate,omitempty"`
-			EmailBodyTemplate     string   `json:"emailBodyTemplate,omitempty"`
-			EmailUseProxy         bool     `json:"emailUseProxy,omitempty"`
-			IngestToken           string   `json:"ingestToken,omitempty"`
-			ApiUrl                string   `json:"apiUrl,omitempty"`
-			GenieKey              string   `json:"genieKey,omitempty"`
-			OpsGenieUseProxy      bool     `json:"opsGenieUseProxy,omitempty"`
-			RoutingKey            string   `json:"routingKey,omitempty"`
-			Severity              string   `json:"severity,omitempty"`
-			PagerDutyUseProxy     bool     `json:"pagerDutyUseProxy,omitempty"`
-			Url                   string   `json:"url,omitempty"`
-			SlackUseProxy         bool     `json:"slackUseProxy,omitempty"`
-			Fields                []struct {
+			Typename          string   `json:"__typename"`
+			ID                string   `json:"id"`
+			Name              string   `json:"name"`
+			Recipients        []string `json:"recipients,omitempty"`
+			SubjectTemplate   string   `json:"subjectTemplate,omitempty"`
+			EmailBodyTemplate string   `json:"emailBodyTemplate,omitempty"`
+			EmailUseProxy     bool     `json:"emailUseProxy,omitempty"`
+			IngestToken       string   `json:"ingestToken,omitempty"`
+			ApiUrl            string   `json:"apiUrl,omitempty"`
+			GenieKey          string   `json:"genieKey,omitempty"`
+			OpsGenieUseProxy  bool     `json:"opsGenieUseProxy,omitempty"`
+			RoutingKey        string   `json:"routingKey,omitempty"`
+			Severity          string   `json:"severity,omitempty"`
+			PagerDutyUseProxy bool     `json:"pagerDutyUseProxy,omitempty"`
+			Url               string   `json:"url,omitempty"`
+			SlackUseProxy     bool     `json:"slackUseProxy,omitempty"`
+			Fields            []struct {
 				FieldName string `json:"fieldName"`
 				Value     string `json:"value"`
 			} `json:"fields,omitempty"`
-			ApiToken              string   `json:"apiToken,omitempty"`
-			Channels              []string `json:"channels,omitempty"`
-			UseProxy              bool     `json:"useProxy,omitempty"`
-			MessageType           string   `json:"messageType,omitempty"`
-			NotifyUrl             string   `json:"notifyUrl,omitempty"`
-			VictorOpsUseProxy     bool     `json:"victorOpsUseProxy,omitempty"`
-			Method                string   `json:"method,omitempty"`
-			WebhookUrl            string   `json:"webhookUrl,omitempty"`
-			WebhookBodyTemplate   string   `json:"webhookBodyTemplate,omitempty"`
-			IgnoreSSL             bool     `json:"ignoreSSL,omitempty"`
-			WebhookUseProxy       bool     `json:"webhookUseProxy,omitempty"`
-			Headers               []struct {
+			ApiToken            string   `json:"apiToken,omitempty"`
+			Channels            []string `json:"channels,omitempty"`
+			UseProxy            bool     `json:"useProxy,omitempty"`
+			MessageType         string   `json:"messageType,omitempty"`
+			NotifyUrl           string   `json:"notifyUrl,omitempty"`
+			VictorOpsUseProxy   bool     `json:"victorOpsUseProxy,omitempty"`
+			Method              string   `json:"method,omitempty"`
+			WebhookUrl          string   `json:"webhookUrl,omitempty"`
+			WebhookBodyTemplate string   `json:"webhookBodyTemplate,omitempty"`
+			IgnoreSSL           bool     `json:"ignoreSSL,omitempty"`
+			WebhookUseProxy     bool     `json:"webhookUseProxy,omitempty"`
+			Headers             []struct {
 				Header string `json:"header"`
 				Value  string `json:"value"`
 			} `json:"headers,omitempty"`

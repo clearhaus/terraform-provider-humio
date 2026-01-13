@@ -21,8 +21,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	humio "github.com/clearhaus/terraform-provider-humio/internal/api"
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -1190,9 +1190,9 @@ resource "humio_action" "test" {
 `
 
 var wantEmailAction = humio.Action{
-	ID:     "",
+	ID:   "",
 	Type: "EmailAction",
-	Name:   "test-action",
+	Name: "test-action",
 	EmailAction: humio.EmailAction{
 		Recipients:      []string{"test@example.org", "ops@example.org"},
 		BodyTemplate:    "this is the subject",
@@ -1201,18 +1201,18 @@ var wantEmailAction = humio.Action{
 }
 
 var wantHumioRepoAction = humio.Action{
-	ID:     "",
+	ID:   "",
 	Type: "HumioRepoAction",
-	Name:   "test-action",
+	Name: "test-action",
 	HumioRepoAction: humio.HumioRepoAction{
 		IngestToken: "12345678901234567890123456789012",
 	},
 }
 
 var wantOpsGenieAction = humio.Action{
-	ID:     "",
+	ID:   "",
 	Type: "OpsGenieAction",
-	Name:   "test-action",
+	Name: "test-action",
 	OpsGenieAction: humio.OpsGenieAction{
 		ApiUrl:   "https://example.org",
 		GenieKey: "12345678901234567890123456789012",
@@ -1220,9 +1220,9 @@ var wantOpsGenieAction = humio.Action{
 }
 
 var wantPagerDutyAction = humio.Action{
-	ID:     "",
+	ID:   "",
 	Type: "PagerDutyAction",
-	Name:   "test-action",
+	Name: "test-action",
 	PagerDutyAction: humio.PagerDutyAction{
 		RoutingKey: "12345678901234567890123456789012",
 		Severity:   "critical",
@@ -1230,37 +1230,37 @@ var wantPagerDutyAction = humio.Action{
 }
 
 var wantSlackAction = humio.Action{
-	ID:     "",
+	ID:   "",
 	Type: "SlackAction",
-	Name:   "test-action",
+	Name: "test-action",
 	SlackAction: humio.SlackAction{
 		Url: "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ",
 		Fields: []humio.SlackFieldEntryInput{
-			{"Link", "{url}" },
-			{"Query", "{query_string}" },
+			{"Link", "{url}"},
+			{"Query", "{query_string}"},
 		},
 	},
 }
 
 var wantSlackPostMessageAction = humio.Action{
-	ID:     "",
+	ID:   "",
 	Type: "SlackPostMessageAction",
-	Name:   "test-action",
+	Name: "test-action",
 	SlackPostMessageAction: humio.SlackPostMessageAction{
 		ApiToken: "12345678901234567890123456789012",
 		Channels: []string{"#alerts", "ops"},
 		Fields: []humio.SlackFieldEntryInput{
-			{"Link", "{url}" },
-			{"Query", "{query_string}" },
+			{"Link", "{url}"},
+			{"Query", "{query_string}"},
 		},
 		UseProxy: true,
 	},
 }
 
 var wantVictorOpsAction = humio.Action{
-	ID:     "",
+	ID:   "",
 	Type: "VictorOpsAction",
-	Name:   "test-action",
+	Name: "test-action",
 	VictorOpsAction: humio.VictorOpsAction{
 		MessageType: "12345678901234567890123456789012",
 		NotifyUrl:   "https://example.org",
@@ -1268,9 +1268,9 @@ var wantVictorOpsAction = humio.Action{
 }
 
 var wantWebhookAction = humio.Action{
-	ID:     "",
+	ID:   "",
 	Type: "WebhookAction",
-	Name:   "test-action",
+	Name: "test-action",
 	WebhookAction: humio.WebhookAction{
 		BodyTemplate: "12345678901234567890123456789012",
 		Headers: []humio.HttpHeaderEntryInput{

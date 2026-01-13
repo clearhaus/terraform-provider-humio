@@ -57,4 +57,3 @@ func (u *Users) GetCurrent() (*User, error) {
 		IsRoot:   resp.CurrentUser.IsRoot,
 	}, nil
 }
-

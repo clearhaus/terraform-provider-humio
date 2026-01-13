@@ -19,8 +19,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	humio "github.com/clearhaus/terraform-provider-humio/internal/api"
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"

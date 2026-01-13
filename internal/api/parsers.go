@@ -133,10 +133,10 @@ type listParsersResponse struct {
 type getParserResponse struct {
 	Repository struct {
 		Parser *struct {
-			ID         string `json:"id"`
-			Name       string `json:"name"`
-			Script     string `json:"script"`
-			TestCases  []struct {
+			ID        string `json:"id"`
+			Name      string `json:"name"`
+			Script    string `json:"script"`
+			TestCases []struct {
 				Event struct {
 					RawString string `json:"rawString"`
 				} `json:"event"`
