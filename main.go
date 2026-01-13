@@ -21,7 +21,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 
-	"github.com/humio/terraform-provider-humio/humio"
+	"github.com/clearhaus/terraform-provider-humio/humio"
 )
 
 var (

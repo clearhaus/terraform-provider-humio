@@ -19,8 +19,8 @@ import (
 	"regexp"
 	"testing"
 
+	humio "github.com/clearhaus/terraform-provider-humio/internal/api"
 	"github.com/google/go-cmp/cmp"
-	humio "github.com/humio/cli/api"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -48,7 +48,6 @@ func TestAccRepositoryInvalidInputs(t *testing.T) {
 	accTestCase(t, []resource.TestStep{
 		{Config: config, ExpectError: regexp.MustCompile(`Inappropriate value for attribute "name"`)},
 		{Config: config, ExpectError: regexp.MustCompile(`Inappropriate value for attribute "description"`)},
-		{Config: config, ExpectError: regexp.MustCompile(`Inappropriate value for attribute "allow_data_deletion"`)},
 		//{Config: config, ExpectError: regexp.MustCompile(`Inappropriate value for attribute "retention"`)},
 	}, nil)
 }
@@ -70,7 +69,6 @@ func TestAccRepositoryBasic(t *testing.T) {
 			Check: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr("humio_repository.test", "name", "repository-test"),
 				resource.TestCheckResourceAttr("humio_repository.test", "description", ""),
-				resource.TestCheckResourceAttr("humio_repository.test", "allow_data_deletion", "false"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.#", "1"), // TODO: Figure out if we want to require this set by the user. If not, how can we ensure this is not put in state?
 				resource.TestCheckNoResourceAttr("humio_repository.test", "retention.0.time_in_days"),
 				resource.TestCheckNoResourceAttr("humio_repository.test", "retention.0.ingest_size_in_gb"),
@@ -90,7 +88,6 @@ func TestAccRepositoryBasicToFull(t *testing.T) {
 			Check: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr("humio_repository.test", "name", "repository-test"),
 				resource.TestCheckResourceAttr("humio_repository.test", "description", ""),
-				resource.TestCheckResourceAttr("humio_repository.test", "allow_data_deletion", "false"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.#", "1"), // TODO: Figure out if we want to require this set by the user. If not, how can we ensure this is not put in state?
 				resource.TestCheckNoResourceAttr("humio_repository.test", "retention.0.time_in_days"),
 				resource.TestCheckNoResourceAttr("humio_repository.test", "retention.0.ingest_size_in_gb"),
@@ -105,7 +102,6 @@ func TestAccRepositoryBasicToFull(t *testing.T) {
 			Check: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr("humio_repository.test", "name", "repository-test"),
 				resource.TestCheckResourceAttr("humio_repository.test", "description", "some description"),
-				resource.TestCheckResourceAttr("humio_repository.test", "allow_data_deletion", "true"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.#", "1"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.0.time_in_days", "30"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.0.ingest_size_in_gb", "10"),
@@ -122,7 +118,6 @@ func TestAccRepositoryBasicToFull(t *testing.T) {
 			Check: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr("humio_repository.test", "name", "repository-test"),
 				resource.TestCheckResourceAttr("humio_repository.test", "description", "some description"),
-				resource.TestCheckResourceAttr("humio_repository.test", "allow_data_deletion", "true"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.#", "1"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.0.time_in_days", "30"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.0.ingest_size_in_gb", "10"),
@@ -142,7 +137,6 @@ func TestAccRepositoryFull(t *testing.T) {
 			Check: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttr("humio_repository.test", "name", "repository-test"),
 				resource.TestCheckResourceAttr("humio_repository.test", "description", "some description"),
-				resource.TestCheckResourceAttr("humio_repository.test", "allow_data_deletion", "true"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.#", "1"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.0.time_in_days", "30"),
 				resource.TestCheckResourceAttr("humio_repository.test", "retention.0.ingest_size_in_gb", "10"),
@@ -178,7 +172,6 @@ const repositoryInvalidInputs = `
 resource "humio_repository" "test" {
     name                = ["invalid"]
     description         = ["invalid"]
-    allow_data_deletion = ["invalid"]
     retention           = "invalid"
 }
 `
@@ -203,9 +196,8 @@ resource "humio_repository" "test" {
 
 const repositoryFull = `
 resource "humio_repository" "test" {
-    name                = "repository-test"
-    description         = "some description"
-    allow_data_deletion = true
+    name        = "repository-test"
+    description = "some description"
     retention {
         storage_size_in_gb = 5
         ingest_size_in_gb  = 10
@@ -215,11 +207,9 @@ resource "humio_repository" "test" {
 `
 
 var wantRepository = humio.Repository{
-	Name:                   "test-repository",
-	Description:            "important",
-	RetentionDays:          30,
-	IngestRetentionSizeGB:  10,
-	StorageRetentionSizeGB: 5,
+	Name:          "test-repository",
+	Description:   "important",
+	RetentionDays: 30,
 }
 
 func TestEncodeDecodeRepositoryResource(t *testing.T) {

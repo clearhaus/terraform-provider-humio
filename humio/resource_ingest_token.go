@@ -21,7 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	humio "github.com/humio/cli/api"
+	humio "github.com/clearhaus/terraform-provider-humio/internal/api"
 )
 
 func resourceIngestToken() *schema.Resource {

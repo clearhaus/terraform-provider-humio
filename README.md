@@ -4,8 +4,8 @@ A (maintained) fork of https://github.com/humio/terraform-provider-humio which w
 
 ## Currently tested with
 
-- [Terraform](https://www.terraform.io/downloads.html) v1.5.7
-- [Go](https://golang.org/doc/install) 1.21 (to build the provider plugin)
+- [Terraform](https://opentofu.org) v1.10.7
+- [Go](https://golang.org/doc/install) 1.25 (to build the provider plugin)
 
 ## Installing the provider
 
@@ -16,7 +16,7 @@ terraform {
   required_providers {
     humio = {
       source  = "clearhaus/humio"
-      version = "0.5.0"
+      version = "1.0.0"
     }
   }
 }
