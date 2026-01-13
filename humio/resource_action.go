@@ -436,7 +436,7 @@ func resourceActionDelete(_ context.Context, d *schema.ResourceData, client inte
 
 	err = client.(*humio.Client).Actions().Delete(
 		d.Get("repository").(string),
-		action.Name,
+		action.ID,
 	)
 	if err != nil {
 		return diag.Errorf("could not delete action: %s", err)
