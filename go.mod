@@ -1,6 +1,6 @@
 module github.com/clearhaus/terraform-provider-humio
 
-go 1.25.5
+go 1.25.13
 
 require (
 	github.com/docker/go-connections v0.6.0
