@@ -215,6 +215,12 @@ var wantRepository = humio.Repository{
 func TestEncodeDecodeRepositoryResource(t *testing.T) {
 	res := resourceRepository()
 	data := res.TestResourceData()
+	// resourceDataFromRepository only writes retention when the config already
+	// has a retention block, so seed a different value than the one expected
+	// for it to overwrite.
+	if err := data.Set("retention", []tfMap{{"time_in_days": float64(1)}}); err != nil {
+		t.Fatal(err)
+	}
 	resourceDataFromRepository(&wantRepository, data)
 	got, err := repositoryFromResourceData(data)
 	if err != nil {
