@@ -1,5 +1,7 @@
 terraform-provider-humio
 main
+# Compiled acceptance test harness (test/ is its own module)
+test/test
 .terraform
 .terraform.*
 terraform.tfstate
