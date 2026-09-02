@@ -22,3 +22,11 @@ jobs:
         run: go build
       - name: Test
         run: go test ./...
+      # The acceptance test harness is a separate module, so it is not covered
+      # by the steps above.
+      - name: Compile acceptance test harness
+        run: go build ./...
+        working-directory: test
+      - name: Vet acceptance test harness
+        run: go vet ./...
+        working-directory: test

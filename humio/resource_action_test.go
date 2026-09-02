@@ -23,6 +23,7 @@ import (
 
 	humio "github.com/clearhaus/terraform-provider-humio/internal/api"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -1333,6 +1334,13 @@ func TestEncodeDecodePagerDutyActionResource(t *testing.T) {
 	}
 }
 
+// slackFieldOrder makes comparisons of Slack fields order-independent. They are
+// decoded from a schema.TypeMap, and Go randomises map iteration order, so the
+// order they come back in carries no meaning.
+var slackFieldOrder = cmpopts.SortSlices(func(a, b humio.SlackFieldEntryInput) bool {
+	return a.FieldName < b.FieldName
+})
+
 func TestEncodeDecodeSlackActionResource(t *testing.T) {
 	res := resourceAction()
 	data := res.TestResourceData()
@@ -1341,8 +1349,8 @@ func TestEncodeDecodeSlackActionResource(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !cmp.Equal(wantSlackAction, got) {
-		t.Error(cmp.Diff(wantSlackAction, got))
+	if !cmp.Equal(wantSlackAction, got, slackFieldOrder) {
+		t.Error(cmp.Diff(wantSlackAction, got, slackFieldOrder))
 	}
 }
 
@@ -1354,8 +1362,8 @@ func TestEncodeDecodeSlackPostMessageActionResource(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !cmp.Equal(wantSlackPostMessageAction, got) {
-		t.Error(cmp.Diff(wantSlackPostMessageAction, got))
+	if !cmp.Equal(wantSlackPostMessageAction, got, slackFieldOrder) {
+		t.Error(cmp.Diff(wantSlackPostMessageAction, got, slackFieldOrder))
 	}
 }
 

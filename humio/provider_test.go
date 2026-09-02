@@ -15,11 +15,10 @@
 package humio
 
 import (
+	"log"
 	"os"
 	"strconv"
 	"testing"
-
-	"github.com/clearhaus/terraform-provider-humio/humio/acceptance"
 )
 
 func TestProviderInternalValidation(t *testing.T) {
@@ -29,25 +28,15 @@ func TestProviderInternalValidation(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	if tfAccVal, ok := os.LookupEnv("TF_ACC"); ok {
-		// Check for presence in the environment
-		_, addrSet := os.LookupEnv("HUMIO_ADDR")
-		_, tokenSet := os.LookupEnv("HUMIO_API_TOKEN")
-		manuallySet := addrSet || tokenSet
-
-		if shouldRun, _ := strconv.ParseBool(tfAccVal); shouldRun {
-			// If externally configured, assume that spinning up a Docker
-			// instance of Humio is wasteful
-			if manuallySet {
-				m.Run()
-			} else {
-				acceptance.RunWithInstance(func(addr string, token string) int {
-					_ = os.Setenv("HUMIO_ADDR", addr)
-					_ = os.Setenv("HUMIO_API_TOKEN", token)
-
-					return m.Run()
-				})
-			}
+	// The acceptance tests skip themselves unless TF_ACC is set, but when it is
+	// set they need a Humio instance to talk to. One can be started for the
+	// duration of the run with "cd test && go run ."; see the README.
+	if tfAcc, _ := strconv.ParseBool(os.Getenv("TF_ACC")); tfAcc {
+		if os.Getenv("HUMIO_ADDR") == "" || os.Getenv("HUMIO_API_TOKEN") == "" {
+			log.Fatal("HUMIO_ADDR and HUMIO_API_TOKEN must be set to run the acceptance tests; " +
+				"run \"cd test && go run .\" to start a throwaway Humio instance in Docker")
 		}
 	}
+
+	os.Exit(m.Run())
 }

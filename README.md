@@ -70,6 +70,41 @@ When running a Terraform command with the publisher defined in `~/.terraformrc`,
 ╵
 ```
 
+## Testing
+
+Unit tests need nothing beyond a checkout:
+
+```bash
+go test ./...
+```
+
+The acceptance tests additionally need a Humio instance to run against. They
+skip themselves unless `TF_ACC` is set.
+
+To run them against a throwaway Humio started in Docker:
+
+```bash
+cd test && go run .
+```
+
+Arguments are passed on to the underlying `go test`, so a single test can be
+picked out with:
+
+```bash
+cd test && go run . -run TestAccRepository
+```
+
+To run them against a Humio you already have, set the same environment
+variables the provider itself uses:
+
+```bash
+TF_ACC=1 HUMIO_ADDR=... HUMIO_API_TOKEN=... go test ./humio/...
+```
+
+The harness in [`test/`](test/) is a separate Go module on purpose. It keeps
+[testcontainers](https://golang.testcontainers.org/), and the container runtime
+client it depends on, out of the provider's own dependency graph.
+
 ## Using the provider
 
 ### Authentication
